@@ -55,3 +55,25 @@ class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = '__all__'
+
+class QuestionResponseSerializer(serializers.ModelSerializer):
+    question_id = serializers.IntegerField()
+    choice_id = serializers.IntegerField()
+
+    class Meta:
+        model = QuestionResponse
+        fields = '__all__'
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        
+        correct_answer = Question.objects.get(id=validated_data.get('question_id'))
+        correct = validated_data.get('choice_id') == correct_answer.id
+
+        question_response = QuestionResponse.objects.create(
+            user_id=user,
+            correct=correct,
+            **validated_data
+        )
+
+        return question_response
