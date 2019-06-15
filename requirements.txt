@@ -5,6 +5,7 @@ django-heroku==0.3.1
 django-rest-framework==0.1.0
 djangorestframework==3.9.4
 djangorestframework-filters==0.11.1
+gunicorn==19.9.0
 Markdown==3.1.1
 psycopg2==2.8.3
 python-dotenv==0.10.3
