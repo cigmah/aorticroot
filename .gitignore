@@ -4,8 +4,6 @@ tmp/
 
 __pycache__
 
-settings.py
-
 db.sqlite3
 
 local.py
