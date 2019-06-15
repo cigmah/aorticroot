@@ -14,6 +14,17 @@ class QuestionCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionComment
         fields = ('user', 'content', 'timestamp')
+        read_only_fields = ('timestamp',)
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+
+        question_comment = QuestionComment.objects.create(
+            user=user,
+            **validated_data
+        )
+
+        return question_comment
 
 class QuestionLikeSerializer(serializers.ModelSerializer):
     user = UserSerializer(source='user_id')

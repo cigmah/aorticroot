@@ -116,3 +116,7 @@ class QuestionTest(APITestCase):
     def testPostQuestionResponse(self):
         # TODO
         pass
+
+    def testPostQuestionComment(self):
+        # TODO
+        pass
