@@ -8,7 +8,7 @@ class QuestionList(generics.ListCreateAPIView):
     """
     List all questions, or create a new question.
     """
-    queryset = Question.objects.all()
+    queryset = Question.objects.all().order_by('id')
     serializer_class = QuestionSerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('tags', 'stem', 'answer', 'explanation')

@@ -17,7 +17,6 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.urlpatterns import format_suffix_patterns
-import drfpasswordless
 import tags.views
 import choices.views
 import questions.views
@@ -31,12 +30,10 @@ urlpatterns = [
     path('choice/', choices.views.ChoiceList.as_view()),
     path('choice/<int:pk>/', choices.views.ChoiceDetail.as_view()),
     # Questions
-    path('question/', questions.views.QuestionList.as_view()),
-    path('question/<int:pk>/', questions.views.QuestionDetail.as_view()),
+    path('question/', questions.views.QuestionList.as_view(), name="question_many"),
+    path('question/<int:pk>/', questions.views.QuestionDetail.as_view(), name="question"),
     path('question/comment/', questions.views.QuestionCommentList.as_view()),
     path('question/comment/<int:pk>', questions.views.QuestionCommentDetail.as_view()),
-    # DRF Passwordless
-    path('', include('drfpasswordless.urls')),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
