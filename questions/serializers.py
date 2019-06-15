@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from questions.models import *
+from tags.models import Tag
+from choices.models import Choice
 from tags.serializers import TagSerializer
 from choices.serializers import ChoiceSerializer
 from users.serializers import UserSerializer
@@ -43,11 +45,11 @@ class QuestionDistractorSerializer(serializers.ModelSerializer):
         return original.pop('distractor')
 
 class QuestionSerializer(serializers.ModelSerializer):
-    tags = QuestionTagSerializer(many=True)
-    distractors = QuestionDistractorSerializer(many=True)
-    comments = QuestionCommentSerializer(many=True)
-    likes = QuestionLikeSerializer(many=True)
-    user_id = UserSerializer()
+    tags = QuestionTagSerializer(many=True, read_only=True)
+    distractors = QuestionDistractorSerializer(many=True, read_only=True)
+    comments = QuestionCommentSerializer(many=True, read_only=True)
+    likes = QuestionLikeSerializer(many=True, read_only=True)
+    user_id = UserSerializer(read_only=True)
     answer = ChoiceSerializer()
 
     class Meta:

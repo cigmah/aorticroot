@@ -10,7 +10,7 @@ class Question(models.Model):
     def __str__(self):
         return self.stem
 
-    stem = models.TextField(unique=True)
+    stem = models.TextField()
     answer = models.ForeignKey(Choice, on_delete=models.PROTECT)
     explanation = models.TextField()
     user_id = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)

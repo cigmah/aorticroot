@@ -13,7 +13,7 @@ class ChoiceTest(APITestCase):
             "content": "test choice",
             "category": 1
         }
-        response = self.client.post(url, data, content='json')
+        response = self.client.post(url, data, format='json')
         return response
 
     def testAddChoice(self):
