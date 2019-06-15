@@ -34,6 +34,7 @@ urlpatterns = [
     path('question/<int:pk>/', questions.views.QuestionDetail.as_view(), name="question_id"),
     path('question/comment/', questions.views.QuestionCommentList.as_view()),
     path('question/comment/<int:pk>', questions.views.QuestionCommentDetail.as_view()),
+    path('question/response/', questions.views.QuestionResponse.as_view(), name="question_response"),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
