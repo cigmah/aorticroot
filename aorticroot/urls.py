@@ -27,8 +27,8 @@ urlpatterns = [
     path('tag/', tags.views.TagList.as_view(), name="tag"),
     path('tag/<int:pk>/', tags.views.TagDetail.as_view(), name="tag_id"),
     # Choices
-    path('choice/', choices.views.ChoiceList.as_view()),
-    path('choice/<int:pk>/', choices.views.ChoiceDetail.as_view()),
+    path('choice/', choices.views.ChoiceList.as_view(), name="choice"),
+    path('choice/<int:pk>/', choices.views.ChoiceDetail.as_view(), name="choice_id"),
     # Questions
     path('question/', questions.views.QuestionList.as_view(), name="question"),
     path('question/<int:pk>/', questions.views.QuestionDetail.as_view(), name="question_id"),
