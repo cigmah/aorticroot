@@ -24,13 +24,13 @@ class QuestionTest(APITestCase):
             user_id=None,
         )
 
-    def testGetQuestionMany(self):
-        url = reverse("question_many")
+    def testGetQuestion(self):
+        url = reverse("question")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def testGetQuestion(self):
-        url = reverse("question", args=[self.initial_question.id])
+    def testGetQuestionId(self):
+        url = reverse("question_id", args=[self.initial_question.id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['id'], self.initial_question.id)

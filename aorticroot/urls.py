@@ -24,14 +24,14 @@ import questions.views
 urlpatterns = [
     path('admin/', admin.site.urls),
     # Tags
-    path('tag/', tags.views.TagList.as_view()),
-    path('tag/<int:pk>/', tags.views.TagDetail.as_view()),
+    path('tag/', tags.views.TagList.as_view(), name="tag"),
+    path('tag/<int:pk>/', tags.views.TagDetail.as_view(), name="tag_id"),
     # Choices
     path('choice/', choices.views.ChoiceList.as_view()),
     path('choice/<int:pk>/', choices.views.ChoiceDetail.as_view()),
     # Questions
-    path('question/', questions.views.QuestionList.as_view(), name="question_many"),
-    path('question/<int:pk>/', questions.views.QuestionDetail.as_view(), name="question"),
+    path('question/', questions.views.QuestionList.as_view(), name="question"),
+    path('question/<int:pk>/', questions.views.QuestionDetail.as_view(), name="question_id"),
     path('question/comment/', questions.views.QuestionCommentList.as_view()),
     path('question/comment/<int:pk>', questions.views.QuestionCommentDetail.as_view()),
 ]
