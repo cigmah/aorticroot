@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 from questions.models import *
 from choices.models import Choice
@@ -32,6 +32,23 @@ class QuestionTest(APITestCase):
             explanation="test explanation",
             user_id=None,
         )
+
+        self.initial_user_data =  {
+            'username': 'testQuestion',
+            'password': 'tester'
+        }
+
+        self.initial_user = User.objects.create_user(
+            username=self.initial_user_data.get('username'),
+            password=self.initial_user_data.get('password')
+        )
+
+        token_response = self.client.post(reverse('user_authenticate'), self.initial_user_data, format='json')
+        self.assertIn('token', token_response.data)
+        self.initial_token = token_response.data.get('token')
+
+        self.authClient = APIClient()
+        self.authClient.credentials(HTTP_AUTHORIZATION='Token ' + self.initial_token)
 
     def testGetQuestion(self):
         url = reverse("question")
@@ -76,10 +93,10 @@ class QuestionTest(APITestCase):
         return data
 
 
-    def testPostQuestionWithNewData(self):
+    def testPostQuestionWithNewDataWithAuth(self):
         url = reverse("question")
         data = self.makeBasePostQuestionData()
-        response = self.client.post(url, data, format='json')
+        response = self.authClient.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def testPostQuestionWithOldTags(self):
@@ -110,13 +127,40 @@ class QuestionTest(APITestCase):
 
         ]
 
-        response = self.client.post(url, data, format='json')
+        response = self.authClient.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def testPostQuestionResponse(self):
-        # TODO
-        pass
+    def testPostQuestionWithoutAuth(self):
+        url = reverse('question')
+        data = self.makeBasePostQuestionData()
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def testPostQuestionResponseCorrect(self):
+        url = reverse('question_response')
+        data = {
+            'question_id': self.initial_question.id,
+            'choice_id': self.initial_correct_choice.id,
+        }
+        response = self.authClient.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data.get('correct'), True)
+
+    def testPostQuestionResponseIncorrect(self):
+        url = reverse('question_response')
+        data = {
+            'question_id': self.initial_question.id,
+            'choice_id': self.initial_incorrect_choice.id,
+        }
+        response = self.authClient.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data.get('correct'), False)
 
     def testPostQuestionComment(self):
-        # TODO
-        pass
+        url = reverse('question_comment')
+        data = {
+            'question_id': self.initial_question.id,
+            'content': 'test comment',
+        }
+        response = self.authClient.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)

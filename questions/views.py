@@ -18,6 +18,7 @@ class QuestionList(generics.ListCreateAPIView):
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('tags', 'stem', 'answer', 'explanation')
     filter_fields = ('tags', 'user_id', )
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def extract_content(self, content_dict):
         content = content_dict.pop('content')
@@ -29,6 +30,7 @@ class QuestionList(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         # TODO move this function to a serializer?
         data = request.data
+        user = request.user
 
         # Pop nested data
         tag_data = data.pop('tags')
@@ -41,7 +43,7 @@ class QuestionList(generics.ListCreateAPIView):
         distractors = [Choice.objects.get_or_create(**self.extract_content(distractor))[0] for distractor in distractor_data]
         (answer, _) = Choice.objects.get_or_create(**answer_data)
 
-        question = Question.objects.create(answer=answer, user_id=None, **data)
+        question = Question.objects.create(answer=answer, user_id=user, **data)
 
         for tag in tags:
             QuestionTag.objects.create(question_id=question, tag_id=tag)
@@ -68,6 +70,22 @@ class QuestionCommentList(generics.ListCreateAPIView):
     serializer_class = QuestionCommentSerializer
     filter_backends = (DjangoFilterBackend)
     filter_fields = ('question_id', 'user_id', 'timestamp')
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def create(self, request, *args, **kwargs):
+        # TODO Move to serializers?
+
+        data = request.data
+
+        question = Question.objects.get(id=data.get('question_id'))
+
+        question_comment = QuestionComment.objects.create(
+            user_id=request.user,
+            question_id=question,
+            content=data.get('content'),
+        )
+
+        return Response(status=status.HTTP_201_CREATED)
 
 class QuestionCommentDetail(generics.RetrieveUpdateDestroyAPIView):
     """
@@ -76,7 +94,29 @@ class QuestionCommentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = QuestionComment.objects.all()
     serializer_class = QuestionCommentSerializer
 
-class QuestionResponse(generics.ListCreateAPIView):
+class QuestionResponseList(generics.ListCreateAPIView):
     queryset = QuestionResponse.objects.all().order_by('-timestamp')
     serializer_class = QuestionResponseSerializer
-    permission_classes = (permissions.IsAuthenticated)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def create(self, request, *args, **kwargs):
+        # TODO Move to serializers?    def create(self, validated_data):
+        data = request.data
+
+        question = Question.objects.get(id=data.get('question_id'))
+        choice = Choice.objects.get(pk=data.get('choice_id'))
+        correct = choice.pk == question.answer.pk
+
+        question_response = QuestionResponse.objects.create(
+            user_id=request.user,
+            correct=correct,
+            question_id=question,
+            choice_id=choice
+        )
+
+        data = {
+            'correct': correct,
+            **data
+        }
+
+        return Response(data, status=status.HTTP_201_CREATED)

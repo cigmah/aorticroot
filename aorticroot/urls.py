@@ -17,9 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.urlpatterns import format_suffix_patterns
+import rest_framework.authtoken.views
 import tags.views
 import choices.views
 import questions.views
+import users.views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,9 +34,17 @@ urlpatterns = [
     # Questions
     path('question/', questions.views.QuestionList.as_view(), name="question"),
     path('question/<int:pk>/', questions.views.QuestionDetail.as_view(), name="question_id"),
-    path('question/comment/', questions.views.QuestionCommentList.as_view()),
+    path('question/comment/', questions.views.QuestionCommentList.as_view(), name='question_comment'),
     path('question/comment/<int:pk>', questions.views.QuestionCommentDetail.as_view()),
-    path('question/response/', questions.views.QuestionResponse.as_view(), name="question_response"),
+    path('question/response/', questions.views.QuestionResponseList.as_view(), name="question_response"),
+    # Users
+    path('user/', users.views.UserGenerate.as_view(), name='user'),
+    path('user/authenticate/', rest_framework.authtoken.views.obtain_auth_token, name='user_authenticate'),
+]
+
+# For browsable API
+urlpatterns += [
+    path('api-auth', include('rest_framework.urls'))
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -9,22 +9,12 @@ from django.contrib.auth.models import User
 
 
 class QuestionCommentSerializer(serializers.ModelSerializer):
-    user = UserSerializer(source='user_id')
+    user = UserSerializer(source='user_id', read_only=True)
 
     class Meta:
         model = QuestionComment
         fields = ('user', 'content', 'timestamp')
         read_only_fields = ('timestamp',)
-
-    def create(self, validated_data):
-        user = self.context['request'].user
-
-        question_comment = QuestionComment.objects.create(
-            user=user,
-            **validated_data
-        )
-
-        return question_comment
 
 class QuestionLikeSerializer(serializers.ModelSerializer):
     user = UserSerializer(source='user_id')
@@ -68,23 +58,9 @@ class QuestionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class QuestionResponseSerializer(serializers.ModelSerializer):
-    question_id = serializers.IntegerField()
-    choice_id = serializers.IntegerField()
-
+    user_id = UserSerializer(read_only=True)
+    question_id = QuestionSerializer(read_only=True)
+    choice_id = ChoiceSerializer(read_only=True)
     class Meta:
         model = QuestionResponse
         fields = '__all__'
-
-    def create(self, validated_data):
-        user = self.context['request'].user
-        
-        correct_answer = Question.objects.get(id=validated_data.get('question_id'))
-        correct = validated_data.get('choice_id') == correct_answer.id
-
-        question_response = QuestionResponse.objects.create(
-            user_id=user,
-            correct=correct,
-            **validated_data
-        )
-
-        return question_response
