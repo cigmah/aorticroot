@@ -4,6 +4,7 @@ from rest_framework import generics
 from rest_framework import filters
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework import permissions
 from django_filters.rest_framework import DjangoFilterBackend
 from tags.models import Tag
 from choices.models import Choice
@@ -74,3 +75,8 @@ class QuestionCommentDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = QuestionComment.objects.all()
     serializer_class = QuestionCommentSerializer
+
+class QuestionResponse(generics.ListCreateAPIView):
+    queryset = QuestionResponse.objects.all().order_by('-timestamp')
+    serializer_class = QuestionResponseSerializer
+    permission_classes = (permissions.IsAuthenticated)
