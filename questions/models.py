@@ -15,6 +15,7 @@ class Question(models.Model):
     explanation = models.TextField()
     user_id = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     flagged = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
 
 class QuestionTag(models.Model):
 
@@ -58,3 +59,14 @@ class QuestionLike(models.Model):
 
     class Meta:
         unique_together = ('user_id', 'question_id')
+
+class QuestionResponse(models.Model):
+
+    def __str__(self):
+        return f'{self.question_id}--{self.user_id}'
+
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    question_id = models.ForeignKey(Question, on_delete=models.CASCADE)
+    choice_id = models.ForeignKey(Choice, null=True, on_delete=models.SET_NULL)
+    correct = models.BooleanField()
+    timestamp = models.DateTimeField(auto_now_add=True)

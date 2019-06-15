@@ -86,10 +86,10 @@ class QuestionTest(APITestCase):
         url = reverse("question")
         data = self.makeBasePostQuestionData()
 
-        #data['answer'] = {
-        #    "content": self.initial_correct_choice.content,
-        #    "category": self.initial_correct_choice.category,
-        #}
+        data['answer'] = {
+            "content": self.initial_correct_choice.content,
+            "category": self.initial_correct_choice.category,
+        }
 
         data['distractors'] = [
             {
@@ -111,5 +111,4 @@ class QuestionTest(APITestCase):
         ]
 
         response = self.client.post(url, data, format='json')
-        print(response.content)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
