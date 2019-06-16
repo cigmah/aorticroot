@@ -58,13 +58,6 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework.authentication.TokenAuthentication',)
 }
 
-PASSWORDLESS_AUTH = {
-    'PASSWORDLESS_AUTH_TYPES': ['EMAIL'],
-    'PASSWORDLESS_USER_MARK_EMAIL_VERIFIED': True,
-    'PASSWORDLESS_USER_EMAIL_VERIFIED_FIELD_NAME': 'email_verified',
-    'PASSWORDLESS_EMAIL_NOREPLY_ADDRESS': 'cigmah.contact@gmail.com'
-}
-
 EMAIL_PORT = 1025
 EMAIL_HOST = 'localhost'
 
