@@ -40,3 +40,9 @@ class UserGenerate(generics.CreateAPIView):
 
         return Response(data, status=status.HTTP_201_CREATED)
 
+class UserStatistic(generics.RetrieveAPIView):
+    """
+    Gets user statistics.
+    """
+
+    pass
