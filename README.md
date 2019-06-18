@@ -89,3 +89,6 @@ python manage.py runserver
   - [ ] Protect against spammed user account generation? Would prefer not
         storing *any* data about users (hence the no-email,
         we-give-you-a-password-and-you-cant-set-it-yourself auth system). 
+- Documenation
+  - [ ] Proper Swagger API
+  - [ ] Comments in code.

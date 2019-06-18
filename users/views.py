@@ -18,11 +18,13 @@ class UserGenerate(generics.CreateAPIView):
         # TODO move to serializer?
 
         username = request.data.get('username')
+        email = request.data.get('email')
 
         password = User.objects.make_random_password()
 
         user = User.objects.create_user(
             username,
+            email,
             password=password
         )
 
