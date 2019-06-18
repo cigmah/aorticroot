@@ -1,4 +1,4 @@
-"""aorticroot URL Configuration
+'''aorticroot URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/2.2/topics/http/urls/
@@ -12,7 +12,7 @@ Class-based views
 Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
+'''
 
 from django.contrib import admin
 from django.urls import path, include
@@ -26,17 +26,18 @@ import users.views
 urlpatterns = [
     path('admin/', admin.site.urls),
     # Tags
-    path('tag/', tags.views.TagList.as_view(), name="tag"),
-    path('tag/<int:pk>/', tags.views.TagDetail.as_view(), name="tag_id"),
+    path('tag/', tags.views.TagList.as_view(), name='tag'),
+    path('tag/<int:pk>/', tags.views.TagDetail.as_view(), name='tag_id'),
     # Choices
-    path('choice/', choices.views.ChoiceList.as_view(), name="choice"),
-    path('choice/<int:pk>/', choices.views.ChoiceDetail.as_view(), name="choice_id"),
+    path('choice/', choices.views.ChoiceList.as_view(), name='choice'),
+    path('choice/<int:pk>/', choices.views.ChoiceDetail.as_view(), name='choice_id'),
     # Questions
-    path('question/', questions.views.QuestionList.as_view(), name="question"),
-    path('question/<int:pk>/', questions.views.QuestionDetail.as_view(), name="question_id"),
+    path('question/', questions.views.QuestionList.as_view(), name='question'),
+    path('question/<int:pk>/', questions.views.QuestionDetail.as_view(), name='question_id'),
+    path('question/random/', questions.views.QuestionRandom.as_view(), name='question_random'),
     path('question/comment/', questions.views.QuestionCommentList.as_view(), name='question_comment'),
     path('question/comment/<int:pk>', questions.views.QuestionCommentDetail.as_view()),
-    path('question/response/', questions.views.QuestionResponseList.as_view(), name="question_response"),
+    path('question/response/', questions.views.QuestionResponseList.as_view(), name='question_response'),
     # Users
     path('user/', users.views.UserGenerate.as_view(), name='user'),
     path('user/authenticate/', rest_framework.authtoken.views.obtain_auth_token, name='user_authenticate'),

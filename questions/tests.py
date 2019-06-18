@@ -61,6 +61,11 @@ class QuestionTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['id'], self.initial_question.id)
 
+    def testGetRandomQuestionDefault(self):
+        url = reverse("question_random")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
     def makeBasePostQuestionData(self):
         data = {
             "stem": "test stem",

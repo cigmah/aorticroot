@@ -8,6 +8,7 @@ from rest_framework import permissions
 from django_filters.rest_framework import DjangoFilterBackend
 from tags.models import Tag
 from choices.models import Choice
+from random import sample
 
 class QuestionList(generics.ListCreateAPIView):
     """
@@ -55,6 +56,27 @@ class QuestionList(generics.ListCreateAPIView):
 
         return Response(serialized.data, status=status.HTTP_201_CREATED)
 
+class QuestionRandom(generics.RetrieveAPIView):
+    """
+    Retrieves a specified number of random questions, default 10.
+    """
+    queryset = Question.objects.all()
+    serializer_class = QuestionSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Takes a query parameter quantity.
+        """
+        quantity = kwargs.get('quantity', 10)
+
+        question_ids = list(Question.objects.all().values_list('id', flat=True))
+        selected_ids = sample(question_ids, min(quantity, len(question_ids)))
+        selected = Question.objects.filter(id__in=selected_ids)
+
+        serialized = QuestionSerializer(selected, many=True)
+
+        return Response(serialized.data, status=status.HTTP_200_OK)
+        
 class QuestionDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     Retrieves, updates or deletes a question.
