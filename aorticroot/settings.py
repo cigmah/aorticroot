@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework',
     'aorticroot',
+    'posts',
     'tags',
     'choices',
     'questions',

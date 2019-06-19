@@ -2,10 +2,10 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
+from django.contrib.auth.models import User
 from questions.models import *
 from choices.models import Choice
 from tags.models import Tag
-
 
 class QuestionTest(APITestCase):
 

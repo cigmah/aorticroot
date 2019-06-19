@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.urlpatterns import format_suffix_patterns
 import rest_framework.authtoken.views
+import posts.views
 import tags.views
 import choices.views
 import questions.views
@@ -25,6 +26,8 @@ import users.views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # Posts
+    path('post/', posts.views.PostList.as_view(), name='post'),
     # Tags
     path('tag/', tags.views.TagList.as_view(), name='tag'),
     path('tag/<int:pk>/', tags.views.TagDetail.as_view(), name='tag_id'),
