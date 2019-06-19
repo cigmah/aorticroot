@@ -23,9 +23,10 @@ class QuestionList(generics.ListCreateAPIView):
 
     def extract_content(self, content_dict):
         content = content_dict.pop('content')
+        
         return {
             'content': content,
-            'defaults': content_dict
+            'defaults': {"category": content_dict["category"]}
         }
 
     def create(self, request, *args, **kwargs):
@@ -42,6 +43,7 @@ class QuestionList(generics.ListCreateAPIView):
         # TODO Put into tag and choice serializer instead?
         tags = [Tag.objects.get_or_create(**self.extract_content(tag))[0] for tag in tag_data]
         distractors = [Choice.objects.get_or_create(**self.extract_content(distractor))[0] for distractor in distractor_data]
+        explanations = [distractor['explanation'] for distractor in distractor_data]
         (answer, _) = Choice.objects.get_or_create(**answer_data)
 
         question = Question.objects.create(answer=answer, user_id=user, **data)
@@ -49,8 +51,8 @@ class QuestionList(generics.ListCreateAPIView):
         for tag in tags:
             QuestionTag.objects.create(question_id=question, tag_id=tag)
 
-        for distractor in distractors:
-            QuestionDistractor.objects.create(question_id=question, choice_id=distractor)
+        for (distractor, explanation) in zip(distractors, explanations):
+            QuestionDistractor.objects.create(question_id=question, choice_id=distractor, explanation=explanation)
 
         serialized = QuestionSerializer(question)
 

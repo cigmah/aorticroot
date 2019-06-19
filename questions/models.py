@@ -35,6 +35,7 @@ class QuestionDistractor(models.Model):
 
     question_id = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='distractors')
     choice_id = models.ForeignKey(Choice, on_delete=models.CASCADE)
+    explanation = models.TextField(null=True, blank=True)
 
     class Meta:
         unique_together = ('question_id', 'choice_id')

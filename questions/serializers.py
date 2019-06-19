@@ -39,11 +39,13 @@ class QuestionDistractorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = QuestionDistractor
-        fields = ('distractor',)
+        fields = ('distractor', 'explanation')
 
     def to_representation(self, instance):
         original = super().to_representation(instance)
-        return original.pop('distractor')
+        popped = original.pop('distractor')
+        popped['explanation'] = original['explanation']
+        return popped
 
 class QuestionSerializer(serializers.ModelSerializer):
     tags = QuestionTagSerializer(many=True, read_only=True)

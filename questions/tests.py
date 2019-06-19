@@ -87,11 +87,13 @@ class QuestionTest(APITestCase):
             "distractors": [
                 {
                     "content": "test distractor",
-                    "category": 0
+                    "category": 0,
+                    "explanation": "This is a test explanation."
                 },
                 {
                     "content": "test distractor 2",
-                    "category": 0
+                    "category": 0,
+                    "explanation": "This is a test explanation."
                 },
             ],
         }
@@ -117,6 +119,7 @@ class QuestionTest(APITestCase):
             {
                 "content": self.initial_incorrect_choice.content,
                 "category": self.initial_incorrect_choice.category,
+                "explanation": "test explanation"
             }
         ]
 
