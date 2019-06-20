@@ -4,20 +4,17 @@ from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 from mail.models import *
 
-class MailTest(APITestCase):
 
+class MailTest(APITestCase):
     def setUp(self):
-        self.url_create = reverse('mail_create')
+        self.url_create = reverse("mail_create")
 
     def test_mail_create_bare_minimum(self):
         """
         A mail created with only a subject and content should be accepted.
         """
 
-        data = {
-            'subject': 'test subject',
-            'content': 'test content',
-        }
+        data = {"subject": "test subject", "content": "test content"}
 
         response = self.client.post(self.url_create, data)
 
@@ -29,10 +26,10 @@ class MailTest(APITestCase):
         """
 
         data = {
-            'name': 'test name',
-            'email': 'test@email.com',
-            'subject': 'test subject',
-            'content': 'test content',
+            "name": "test name",
+            "email": "test@email.com",
+            "subject": "test subject",
+            "content": "test content",
         }
 
         response = self.client.post(self.url_create, data)
@@ -44,9 +41,7 @@ class MailTest(APITestCase):
         Submitting a mail without a subject and/or content should fail.
         """
 
-        data = {
-            'subject': 'test subject',
-        }
+        data = {"subject": "test subject"}
 
         response = self.client.post(self.url_create, data)
 

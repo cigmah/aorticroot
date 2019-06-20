@@ -6,36 +6,28 @@ from rest_framework import permissions
 from questions.models import *
 from questions.serializers import *
 
+
 class QuestionListCreate(generics.ListCreateAPIView):
     """
     List all questions, or create a new question.
     """
 
-    queryset = Question \
-        .objects \
-        .all() \
-        .order_by('id')
+    queryset = Question.objects.all().order_by("id")
 
     serializer_class = QuestionSerializer
 
-    search_fields = (
-        'stem',
-        'note__title',
-        'note__content',
-    )
+    search_fields = ("stem", "note__title", "note__content")
 
     filter_fields = (
-        'note',
-        'note__contributor',
-        'note__year_level',
-        'note__specialty',
-        'note__domain',
-        'contributor',
+        "note",
+        "note__contributor",
+        "note__year_level",
+        "note__specialty",
+        "note__domain",
+        "contributor",
     )
 
-    permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly,
-    )
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def create(self, request, *args, **kwargs):
         """
@@ -47,9 +39,9 @@ class QuestionListCreate(generics.ListCreateAPIView):
 
         # Get the user from the request
         contributor = request.user
-        note_id = request.data.get('note_id')
-        stem = request.data.get('stem')
-        choices = request.data.get('choices')
+        note_id = request.data.get("note_id")
+        stem = request.data.get("stem")
+        choices = request.data.get("choices")
 
         if None in [note_id, stem, choices]:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -59,7 +51,7 @@ class QuestionListCreate(generics.ListCreateAPIView):
         note = Note.objects.get(id=note_id)
 
         # Assert only one correct choice
-        correct = [choice for choice in choices if choice['is_correct']]
+        correct = [choice for choice in choices if choice["is_correct"]]
         assert len(correct) == 1
 
         # Assert there is at least one other option
@@ -67,24 +59,18 @@ class QuestionListCreate(generics.ListCreateAPIView):
 
         # Add the question
         question = Question.objects.create(
-            contributor=contributor,
-            note=note,
-            stem=stem,
+            contributor=contributor, note=note, stem=stem
         )
 
         # TODO Find a way to do this in bulk.
         # bulk_create() had issues.
         for choice in choices:
-            QuestionChoice.objects.create(
-                question=question,
-                **choice
-            )
+            QuestionChoice.objects.create(question=question, **choice)
 
-        data = {
-            'id': question.id,
-        }
+        data = {"id": question.id}
 
         return Response(data, status=status.HTTP_201_CREATED)
+
 
 class QuestionRandomList(generics.RetrieveAPIView):
     """
@@ -97,46 +83,35 @@ class QuestionRandomList(generics.RetrieveAPIView):
         TODO if user is authenticated, mix with spaced repetition
         """
 
-        quantity = kwargs.get('quantity', 10)
+        quantity = kwargs.get("quantity", 10)
 
-        question_ids = list(
-            Question \
-                .objects \
-                .all() \
-                .values_list('id', flat=True)
-        )
+        question_ids = list(Question.objects.all().values_list("id", flat=True))
 
-        selected_ids = sample(
-            question_ids,
-            min(quantity, len(question_ids))
-        )
+        selected_ids = sample(question_ids, min(quantity, len(question_ids)))
 
-        data = {
-            'ids': selected_ids,
-        }
+        data = {"ids": selected_ids}
 
         return Response(data, status=status.HTTP_200_OK)
+
 
 class QuestionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     """
     Retrieves, updates or deletes a question.
     """
+
     queryset = Question.objects.all()
 
     serializer_class = QuestionSerializer
 
-    permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly,
-    )
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 class QuestionResponseCreate(generics.CreateAPIView):
 
     serializer_class = QuestionResponseSerializer
 
-    permission_classes = (
-        permissions.IsAuthenticated,
-    )
+    permission_classes = (permissions.IsAuthenticated,)
+
 
 class QuestionLikeCreate(generics.CreateAPIView):
     """
@@ -147,9 +122,8 @@ class QuestionLikeCreate(generics.CreateAPIView):
 
     serializer_class = QuestionLikeSerializer
 
-    permission_classes = (
-        permissions.IsAuthenticated,
-    )
+    permission_classes = (permissions.IsAuthenticated,)
+
 
 class QuestionFlagCreate(generics.CreateAPIView):
     """
@@ -160,6 +134,4 @@ class QuestionFlagCreate(generics.CreateAPIView):
 
     serializer_class = QuestionFlagSerializer
 
-    permission_classes = (
-        permissions.IsAuthenticated,
-    )
+    permission_classes = (permissions.IsAuthenticated,)

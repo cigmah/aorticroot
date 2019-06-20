@@ -9,33 +9,128 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-    ]
+    dependencies = [migrations.swappable_dependency(settings.AUTH_USER_MODEL)]
 
     operations = [
         migrations.CreateModel(
-            name='Note',
+            name="Note",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('modified_at', models.DateTimeField(auto_now=True)),
-                ('year_level', models.IntegerField(choices=[(0, 'GENERAL_YEAR_LEVEL'), (1, 'YEAR_1'), (2, 'YEAR_2A'), (3, 'YEAR_3B'), (4, 'YEAR_4C'), (5, 'YEAR_5D')], default=0)),
-                ('specialty', models.IntegerField(choices=[(0, 'GENERAL_SPECIALTY'), (1, 'ANATOMY'), (2, 'PHYSIOLOGY'), (3, 'BIOCHEMISTRY'), (4, 'GENETICS'), (5, 'PHARMACOLOGY'), (6, 'PSYCHOLOGY'), (7, 'MICROBIOLOGY'), (8, 'SOCIAL_ISSUES'), (9, 'POPULATION_HEALTH'), (10, 'CLINICAL_SKILLS'), (11, 'CARDIOVASCULAR'), (12, 'RESPIRATORY'), (13, 'GASTROINTESTINAL'), (14, 'HEPATOBILIARY'), (15, 'GENITOURINARY'), (16, 'ENDOCRINE'), (17, 'NEUROLOGICAL'), (18, 'MUSCULOSKELETAL'), (19, 'HAEMATOLOGICAL'), (20, 'INFECTIOUS_DISEASE'), (21, 'DERMATOLOGICAL'), (22, 'PATHOLOGY'), (23, 'GENERAL_PRACTICE'), (24, 'PSYCHIATRY'), (25, 'OBGYN'), (26, 'PAEDIATRICS'), (27, 'LAW'), (28, 'ETHICS')], default=0)),
-                ('domain', models.IntegerField(choices=[(0, 'GENERAL_DOMAIN'), (1, 'FOUNDATION'), (2, 'ASSESSMENT'), (3, 'INVESTIGATION'), (4, 'DIAGNOSIS'), (5, 'MANAGEMENT')], default=0)),
-                ('title', models.CharField(max_length=60)),
-                ('content', models.TextField()),
-                ('contributor', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("modified_at", models.DateTimeField(auto_now=True)),
+                (
+                    "year_level",
+                    models.IntegerField(
+                        choices=[
+                            (0, "GENERAL_YEAR_LEVEL"),
+                            (1, "YEAR_1"),
+                            (2, "YEAR_2A"),
+                            (3, "YEAR_3B"),
+                            (4, "YEAR_4C"),
+                            (5, "YEAR_5D"),
+                        ],
+                        default=0,
+                    ),
+                ),
+                (
+                    "specialty",
+                    models.IntegerField(
+                        choices=[
+                            (0, "GENERAL_SPECIALTY"),
+                            (1, "ANATOMY"),
+                            (2, "PHYSIOLOGY"),
+                            (3, "BIOCHEMISTRY"),
+                            (4, "GENETICS"),
+                            (5, "PHARMACOLOGY"),
+                            (6, "PSYCHOLOGY"),
+                            (7, "MICROBIOLOGY"),
+                            (8, "SOCIAL_ISSUES"),
+                            (9, "POPULATION_HEALTH"),
+                            (10, "CLINICAL_SKILLS"),
+                            (11, "CARDIOVASCULAR"),
+                            (12, "RESPIRATORY"),
+                            (13, "GASTROINTESTINAL"),
+                            (14, "HEPATOBILIARY"),
+                            (15, "GENITOURINARY"),
+                            (16, "ENDOCRINE"),
+                            (17, "NEUROLOGICAL"),
+                            (18, "MUSCULOSKELETAL"),
+                            (19, "HAEMATOLOGICAL"),
+                            (20, "INFECTIOUS_DISEASE"),
+                            (21, "DERMATOLOGICAL"),
+                            (22, "PATHOLOGY"),
+                            (23, "GENERAL_PRACTICE"),
+                            (24, "PSYCHIATRY"),
+                            (25, "OBGYN"),
+                            (26, "PAEDIATRICS"),
+                            (27, "LAW"),
+                            (28, "ETHICS"),
+                        ],
+                        default=0,
+                    ),
+                ),
+                (
+                    "domain",
+                    models.IntegerField(
+                        choices=[
+                            (0, "GENERAL_DOMAIN"),
+                            (1, "FOUNDATION"),
+                            (2, "ASSESSMENT"),
+                            (3, "INVESTIGATION"),
+                            (4, "DIAGNOSIS"),
+                            (5, "MANAGEMENT"),
+                        ],
+                        default=0,
+                    ),
+                ),
+                ("title", models.CharField(max_length=60)),
+                ("content", models.TextField()),
+                (
+                    "contributor",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='NoteComment',
+            name="NoteComment",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('content', models.TextField()),
-                ('author', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
-                ('note', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='notes.Note')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("content", models.TextField()),
+                (
+                    "author",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "note",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="notes.Note"
+                    ),
+                ),
             ],
         ),
     ]

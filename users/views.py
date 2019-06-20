@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework import permissions
 from users.serializers import *
 
+
 class UserCreate(generics.CreateAPIView):
     """
     Creates a new user.
@@ -18,30 +19,19 @@ class UserCreate(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         # TODO move to serializer?
 
-        username = request.data.get('username')
-        email = request.data.get('email')
+        username = request.data.get("username")
+        email = request.data.get("email")
 
-        password = User \
-            .objects \
-            .make_random_password()
+        password = User.objects.make_random_password()
 
-        user = User.objects.create_user(
-            username,
-            email,
-            password=password
-        )
+        user = User.objects.create_user(username, email, password=password)
 
-        token = Token.objects.create(
-            user=user
-        )
+        token = Token.objects.create(user=user)
 
-        data = {
-            'username': user.username,
-            'token': token.key,
-            'password': password,
-        }
+        data = {"username": user.username, "token": token.key, "password": password}
 
         return Response(data, status=status.HTTP_201_CREATED)
+
 
 class UserStatistic(generics.RetrieveAPIView):
     """

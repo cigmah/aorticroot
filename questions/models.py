@@ -9,29 +9,19 @@ class Question(models.Model):
     to parent notes. Each question MUST have a parent note.
     """
 
-    note = models.ForeignKey(
-        Note,
-        on_delete=models.PROTECT,
-    )
+    note = models.ForeignKey(Note, on_delete=models.PROTECT)
 
-    contributor = models.ForeignKey(
-        User,
-        null=True,
-        on_delete=models.SET_NULL,
-    )
+    contributor = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
 
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    modified_at = models.DateTimeField(
-        auto_now=True,
-    )
+    modified_at = models.DateTimeField(auto_now=True)
 
     stem = models.TextField()
 
     def __str__(self):
         return self.stem
+
 
 class QuestionChoice(models.Model):
     """
@@ -40,18 +30,12 @@ class QuestionChoice(models.Model):
     """
 
     question = models.ForeignKey(
-        Question,
-        related_name='question_choice',
-        on_delete=models.CASCADE,
+        Question, related_name="question_choice", on_delete=models.CASCADE
     )
 
-    content = models.CharField(
-        max_length=80,
-    )
+    content = models.CharField(max_length=80)
 
-    explanation = models.TextField(
-        null=True,
-    )
+    explanation = models.TextField(null=True)
 
     # Enforcing that there is exactly one is_correct=True
     # row per QuestionChoice will have to be done on the
@@ -67,10 +51,11 @@ class QuestionChoice(models.Model):
 
     class Meta:
         # Ensure each choice for a question is different
-        unique_together = ('question', 'content')
+        unique_together = ("question", "content")
 
     def __str__(self):
         return self.content
+
 
 class QuestionResponse(models.Model):
     """
@@ -78,27 +63,17 @@ class QuestionResponse(models.Model):
     answer questions.
     """
 
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    question = models.ForeignKey(
-        Question,
-        on_delete=models.CASCADE
-    )
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
-    choice = models.ForeignKey(
-        QuestionChoice,
-        on_delete=models.CASCADE
-    )
+    choice = models.ForeignKey(QuestionChoice, on_delete=models.CASCADE)
 
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.question_id}--{self.user_id}'
+        return f"{self.question_id}--{self.user_id}"
+
 
 class QuestionLike(models.Model):
     """
@@ -106,22 +81,16 @@ class QuestionLike(models.Model):
     about a question.
     """
 
-    user = models.ForeignKey(
-        User,
-        null=True,
-        on_delete=models.SET_NULL
-    )
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
 
-    question = models.ForeignKey(
-        Question,
-        on_delete=models.CASCADE,
-    )
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
     class Meta:
-        unique_together = ('user', 'question')
+        unique_together = ("user", "question")
 
     def __str__(self):
-        return f'{self.user_id}--{self.question_id}'
+        return f"{self.user_id}--{self.question_id}"
+
 
 class QuestionFlag(models.Model):
     """
@@ -134,19 +103,12 @@ class QuestionFlag(models.Model):
     Alternatively, flagged questions can simply not be shown.
     """
 
-    user = models.ForeignKey(
-        User,
-        null=True,
-        on_delete=models.SET_NULL
-    )
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
 
-    question = models.ForeignKey(
-        Question,
-        on_delete=models.CASCADE,
-    )
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
     class Meta:
-        unique_together = ('user', 'question')
+        unique_together = ("user", "question")
 
     def __str__(self):
-        return f'{self.user_id}--{self.question_id}'
+        return f"{self.user_id}--{self.question_id}"
