@@ -7,29 +7,74 @@ from users.models import *
 
 class UserTest(APITestCase):
 
-    def makeUser(self, username):
-        url = reverse("user")
+    def setUp(self):
+
+        self.url_create = reverse('user_create')
+        self.url_authenticate = reverse('user_authenticate')
+
+
+    def make_user(self, username):
+
         data = {
-            "username": username,
+            'username': username,
+            'email': f'{username}@email.com'
         }
-        response = self.client.post(url, data, format='json')
+
+        response = self.client.post(
+            self.url_create,
+            data,
+            format='json'
+        )
+
         return response
 
-    def testPostUserValid(self):
-        response = self.makeUser("tester")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertIn('username', response.data)
-        self.assertIn('password', response.data)
-        self.assertIn('token', response.data, )
+    def test_post_user_valid(self):
 
-    def testPostAuthenticate(self):
-        username = 'testerAuth'
-        created = self.makeUser('testerAuth')
-        url = reverse("user_authenticate")
+        response = self.make_user("tester_create")
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_201_CREATED
+        )
+
+        self.assertIn(
+            'username',
+            response.data
+        )
+
+        self.assertIn(
+            'password',
+            response.data
+        )
+
+        self.assertIn(
+            'token',
+            response.data,
+        )
+
+    def test_post_authenticate(self):
+
+        username = 'tester_auth'
+
+        created = self.make_user('tester_auth')
+
         data = {
             'username': username,
             'password': created.data.get('password')
         }
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('token', response.data)
+
+        response = self.client.post(
+            self.url_authenticate,
+            data,
+            format='json'
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+
+        self.assertIn(
+            'token',
+            response.data
+        )

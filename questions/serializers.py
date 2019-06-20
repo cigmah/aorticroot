@@ -1,66 +1,97 @@
+import json
 from rest_framework import serializers
-from questions.models import *
-from tags.models import Tag
-from choices.models import Choice
-from tags.serializers import TagSerializer
-from choices.serializers import ChoiceSerializer
 from users.serializers import UserSerializer
 from django.contrib.auth.models import User
+from questions.models import *
+from notes.serializers import NoteSerializer
+from notes.models import Note
 
-
-class QuestionCommentSerializer(serializers.ModelSerializer):
-    user = UserSerializer(source='user_id', read_only=True)
+class QuestionChoiceSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = QuestionComment
-        fields = ('user', 'content', 'timestamp')
-        read_only_fields = ('timestamp',)
+        model = QuestionChoice
+        fields = '__all__'
 
 class QuestionLikeSerializer(serializers.ModelSerializer):
-    user = UserSerializer(source='user_id')
+
+    user = UserSerializer(
+        required=False,
+        read_only=True,
+    )
 
     class Meta:
         model = QuestionLike
-        fields = ('user',)
+        fields = '__all__'
 
-class QuestionTagSerializer(serializers.ModelSerializer):
-    tag = TagSerializer(source='tag_id')
+    def create(self, validated_data):
+        user = self.context['request'].user
+
+        like = QuestionLike.objects.create(
+            user=user,
+            **validated_data
+        )
+        return like
+
+class QuestionFlagSerializer(serializers.ModelSerializer):
+
+    user = UserSerializer(
+        required=False,
+        read_only=True,
+    )
 
     class Meta:
-        model = QuestionTag
-        fields = ('tag',)
+        model = QuestionFlag
+        fields = '__all__'
 
-    def to_representation(self, instance):
-        original = super().to_representation(instance)
-        return original.pop('tag')
+    def create(self, validated_data):
+        user = self.context['request'].user
 
-class QuestionDistractorSerializer(serializers.ModelSerializer):
-    distractor = ChoiceSerializer(source='choice_id')
+        flag = QuestionFlag.objects.create(
+            user=user,
+            **validated_data,
+        )
 
-    class Meta:
-        model = QuestionDistractor
-        fields = ('distractor',)
-
-    def to_representation(self, instance):
-        original = super().to_representation(instance)
-        return original.pop('distractor')
+        return flag
 
 class QuestionSerializer(serializers.ModelSerializer):
-    tags = QuestionTagSerializer(many=True, read_only=True)
-    distractors = QuestionDistractorSerializer(many=True, read_only=True)
-    comments = QuestionCommentSerializer(many=True, read_only=True)
-    likes = QuestionLikeSerializer(many=True, read_only=True)
-    user_id = UserSerializer(read_only=True)
-    answer = ChoiceSerializer()
+
+    note = NoteSerializer()
+
+    contributor = UserSerializer()
+
+    choices = QuestionChoiceSerializer(
+        source='question_choice',
+        many=True,
+    )
 
     class Meta:
         model = Question
         fields = '__all__'
+        read_only = ('created_at', 'modified_at',)
+
 
 class QuestionResponseSerializer(serializers.ModelSerializer):
-    user_id = UserSerializer(read_only=True)
-    question_id = QuestionSerializer(read_only=True)
-    choice_id = ChoiceSerializer(read_only=True)
+
+    user = serializers.PrimaryKeyRelatedField(
+        required=False,
+        read_only=True,
+    )
+
     class Meta:
         model = QuestionResponse
         fields = '__all__'
+
+
+    def create(self, validated_data):
+        """
+        Get the user from the request.
+        """
+
+        user = self.context['request'].user
+
+        response = QuestionResponse.objects.create(
+            user=user,
+            **validated_data
+        )
+
+        return response

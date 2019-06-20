@@ -7,10 +7,11 @@ from rest_framework.response import Response
 from rest_framework import permissions
 from users.serializers import *
 
-class UserGenerate(generics.CreateAPIView):
+class UserCreate(generics.CreateAPIView):
     """
-    Generates a new user.
+    Creates a new user.
     """
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
@@ -20,7 +21,9 @@ class UserGenerate(generics.CreateAPIView):
         username = request.data.get('username')
         email = request.data.get('email')
 
-        password = User.objects.make_random_password()
+        password = User \
+            .objects \
+            .make_random_password()
 
         user = User.objects.create_user(
             username,

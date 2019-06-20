@@ -1,72 +1,152 @@
 from django.db import models
-from django.db import models
-from tags.models import Tag
-from choices.models import Choice
 from django.contrib.auth.models import User
+from notes.models import Note
 
 
 class Question(models.Model):
+    """
+    This module contains multiple-choice questions which are attached
+    to parent notes. Each question MUST have a parent note.
+    """
+
+    note = models.ForeignKey(
+        Note,
+        on_delete=models.PROTECT,
+    )
+
+    contributor = models.ForeignKey(
+        User,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    modified_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    stem = models.TextField()
 
     def __str__(self):
         return self.stem
 
-    stem = models.TextField()
-    answer = models.ForeignKey(Choice, on_delete=models.PROTECT)
-    explanation = models.TextField()
-    user_id = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
-    flagged = models.BooleanField(default=False)
-    timestamp = models.DateTimeField(auto_now_add=True)
+class QuestionChoice(models.Model):
+    """
+    This module contains the multiple choice options for each
+    question, as a one-to-many relation.
+    """
 
-class QuestionTag(models.Model):
+    question = models.ForeignKey(
+        Question,
+        related_name='question_choice',
+        on_delete=models.CASCADE,
+    )
 
-    def __str__(self):
-        return f'{self.question_id}-{self.tag_id}'
+    content = models.CharField(
+        max_length=80,
+    )
 
-    question_id = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='tags')
-    tag_id = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    explanation = models.TextField(
+        null=True,
+    )
+
+    # Enforcing that there is exactly one is_correct=True
+    # row per QuestionChoice will have to be done on the
+    # application layer. Initially, the answer and explanation
+    # were put into the Question table to guarantee one and only
+    # one correct answer, but this complicated the application
+    # logic somewhat, and it was deemed easier to enforce this
+    # both on the frontend and during the serialization of
+    # received POST data rather than on the database model
+    # level.
+    # Question choices should only ever be created as a batch.
+    is_correct = models.BooleanField()
 
     class Meta:
-        unique_together = ('question_id', 'tag_id')
-
-class QuestionDistractor(models.Model):
-
-    def __str__(self):
-        return f'{self.question_id}--{self.choice_id}'
-
-    question_id = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='distractors')
-    choice_id = models.ForeignKey(Choice, on_delete=models.CASCADE)
-
-    class Meta:
-        unique_together = ('question_id', 'choice_id')
-
-class QuestionComment(models.Model):
+        # Ensure each choice for a question is different
+        unique_together = ('question', 'content')
 
     def __str__(self):
         return self.content
 
-    user_id = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
-    question_id = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='comments')
-    content = models.TextField()
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-class QuestionLike(models.Model):
-
-    def __str__(self):
-        return f'{self.user_id}--{self.question_id}'
-
-    user_id = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
-    question_id = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='likes')
-
-    class Meta:
-        unique_together = ('user_id', 'question_id')
-
 class QuestionResponse(models.Model):
+    """
+    This model contains responses that users give when they
+    answer questions.
+    """
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    question = models.ForeignKey(
+        Question,
+        on_delete=models.CASCADE
+    )
+
+    choice = models.ForeignKey(
+        QuestionChoice,
+        on_delete=models.CASCADE
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
 
     def __str__(self):
         return f'{self.question_id}--{self.user_id}'
 
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    question_id = models.ForeignKey(Question, on_delete=models.CASCADE)
-    choice_id = models.ForeignKey(Choice, null=True, on_delete=models.SET_NULL)
-    correct = models.BooleanField()
-    timestamp = models.DateTimeField(auto_now_add=True)
+class QuestionLike(models.Model):
+    """
+    This model contains likes from users who express positivity
+    about a question.
+    """
+
+    user = models.ForeignKey(
+        User,
+        null=True,
+        on_delete=models.SET_NULL
+    )
+
+    question = models.ForeignKey(
+        Question,
+        on_delete=models.CASCADE,
+    )
+
+    class Meta:
+        unique_together = ('user', 'question')
+
+    def __str__(self):
+        return f'{self.user_id}--{self.question_id}'
+
+class QuestionFlag(models.Model):
+    """
+    This model contains flgs from users who express negativity
+    about a question.
+
+    Generally, this should not be exposed via an API; instead,
+    the aggregate should be counted and tallied for responses.
+
+    Alternatively, flagged questions can simply not be shown.
+    """
+
+    user = models.ForeignKey(
+        User,
+        null=True,
+        on_delete=models.SET_NULL
+    )
+
+    question = models.ForeignKey(
+        Question,
+        on_delete=models.CASCADE,
+    )
+
+    class Meta:
+        unique_together = ('user', 'question')
+
+    def __str__(self):
+        return f'{self.user_id}--{self.question_id}'

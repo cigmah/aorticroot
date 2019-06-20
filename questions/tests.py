@@ -2,170 +2,212 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
+from django.contrib.auth.models import User
 from questions.models import *
-from choices.models import Choice
-from tags.models import Tag
+from notes.models import Note
 
 
 class QuestionTest(APITestCase):
 
     def setUp(self):
-        self.initial_correct_choice = Choice.objects.create(
-            content="correct choice",
-            category=1
-        )
-        self.initial_incorrect_choice = Choice.objects.create(
-            content="incorrect choice",
-            category=1
-        )
-        self.initial_tag = Tag.objects.create(
-            content="test tag",
-            category=1
-        )
-        self.second_tag = Tag.objects.create(
-            content="test tag 2",
-            category=2
-        )
-        self.initial_question = Question.objects.create(
-            stem="test stem",
-            answer=self.initial_correct_choice,
-            explanation="test explanation",
-            user_id=None,
+
+        self.url_list_create = reverse('question_list_create')
+        self.url_random_list = reverse('question_random_list')
+        self.url_response_create = reverse('question_response_create')
+        self.url_like_create = reverse('question_like_create')
+        self.url_flag_create = reverse('question_flag_create')
+
+        self.make_auth_client()
+
+        self.note = Note.objects.create(
+            contributor=self.user,
+            year_level=0,
+            specialty=1,
+            domain=2,
+            title='test note',
+            content='test content',
         )
 
-        self.initial_user_data =  {
+
+    def make_auth_client(self):
+
+        # Create a user
+        self.user_data =  {
             'username': 'testQuestion',
             'password': 'tester'
         }
 
-        self.initial_user = User.objects.create_user(
-            username=self.initial_user_data.get('username'),
-            password=self.initial_user_data.get('password')
+        self.user = User.objects.create_user(
+            username=self.user_data.get('username'),
+            password=self.user_data.get('password')
         )
 
-        token_response = self.client.post(reverse('user_authenticate'), self.initial_user_data, format='json')
-        self.assertIn('token', token_response.data)
-        self.initial_token = token_response.data.get('token')
+        # Get a token
+        token_response = self.client.post(
+            reverse('user_authenticate'),
+            self.user_data,
+            format='json'
+        )
 
-        self.authClient = APIClient()
-        self.authClient.credentials(HTTP_AUTHORIZATION='Token ' + self.initial_token)
+        self.assertIn(
+            'token',
+            token_response.data
+        )
 
-    def testGetQuestion(self):
-        url = reverse("question")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.token = token_response.data.get('token')
 
-    def testGetQuestionId(self):
-        url = reverse("question_id", args=[self.initial_question.id])
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['id'], self.initial_question.id)
+        # Create an authenticated client
+        self.auth_client = APIClient()
 
-    def testGetRandomQuestionDefault(self):
-        url = reverse("question_random")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.auth_client.credentials(
+            HTTP_AUTHORIZATION='Token ' + self.token
+        )
 
-    def makeBasePostQuestionData(self):
+    def test_create_question_valid(self):
+        """
+        Creating a valid question should pass.
+        """
+
         data = {
-            "stem": "test stem",
-            "answer": {
-                "content": "test answer",
-                "category": 1
-            },
-            "explanation": "test explanation",
-            "tags": [
+            'note_id': self.note.id,
+            'stem': 'test stem',
+            'choices': [
                 {
-                    "content": "test new tag",
-                    "category": 0,
+                    'content': 'test choice',
+                    'explanation': 'test explanation',
+                    'is_correct': True
                 },
                 {
-                    "content": "test new tag 2",
-                    "category": 1,
-                }
-            ],
-            "distractors": [
-                {
-                    "content": "test distractor",
-                    "category": 0
+                    'content': 'test choice 2',
+                    'explanation': 'test explanation',
+                    'is_correct': False
                 },
                 {
-                    "content": "test distractor 2",
-                    "category": 0
+                    'content': 'test choice 3',
+                    'explanation': 'test explanation',
+                    'is_correct': False
                 },
-            ],
-        }
-        return data
-
-
-    def testPostQuestionWithNewDataWithAuth(self):
-        url = reverse("question")
-        data = self.makeBasePostQuestionData()
-        response = self.authClient.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-    def testPostQuestionWithOldTags(self):
-        url = reverse("question")
-        data = self.makeBasePostQuestionData()
-
-        data['answer'] = {
-            "content": self.initial_correct_choice.content,
-            "category": self.initial_correct_choice.category,
+            ]
         }
 
-        data['distractors'] = [
-            {
-                "content": self.initial_incorrect_choice.content,
-                "category": self.initial_incorrect_choice.category,
-            }
-        ]
+        response = self.auth_client.post(
+            self.url_list_create,
+            data,
+            format='json'
+        )
 
-        data['tags'] = [
-            {
-                "content": self.initial_tag.content,
-                "category": self.initial_tag.category,
-            },
-            {
-                "content": self.second_tag.content,
-                "category": self.second_tag.category,
-            }
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_201_CREATED,
+        )
 
-        ]
 
-        response = self.authClient.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        return response
 
-    def testPostQuestionWithoutAuth(self):
-        url = reverse('question')
-        data = self.makeBasePostQuestionData()
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    def test_get_question(self):
+        """
+        Getting a question by ID should pass.
+        """
 
-    def testPostQuestionResponseCorrect(self):
-        url = reverse('question_response')
+        created_response = self.test_create_question_valid()
+
+        response = self.client.get(
+            reverse('question_retrieve_update_destroy',
+                    kwargs={'pk':created_response.data['id']})
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        return response
+
+
+    def test_post_question_response(self):
+        """
+        Posting a response to a question should pass.
+        """
+
+        got_question_response = self.test_get_question()
+
         data = {
-            'question_id': self.initial_question.id,
-            'choice_id': self.initial_correct_choice.id,
+            'question': got_question_response.data['id'],
+            'choice': got_question_response.data['choices'][0]['id'],
         }
-        response = self.authClient.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data.get('correct'), True)
 
-    def testPostQuestionResponseIncorrect(self):
-        url = reverse('question_response')
-        data = {
-            'question_id': self.initial_question.id,
-            'choice_id': self.initial_incorrect_choice.id,
-        }
-        response = self.authClient.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data.get('correct'), False)
+        response = self.auth_client.post(
+            self.url_response_create,
+            data,
+        )
 
-    def testPostQuestionComment(self):
-        url = reverse('question_comment')
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_201_CREATED,
+        )
+
+    def test_post_question_like(self):
+        """
+        Posting a like to a question should pass.
+        """
+
+        created_response = self.test_create_question_valid()
+
         data = {
-            'question_id': self.initial_question.id,
-            'content': 'test comment',
+            'question': created_response.data['id'],
         }
-        response = self.authClient.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        response = self.auth_client.post(
+            self.url_like_create,
+            data,
+            format='json',
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_201_CREATED,
+        )
+
+    def test_post_question_flag(self):
+        """
+        Posting a flag to a question should pass.
+        """
+
+        created_response = self.test_create_question_valid()
+
+        data = {
+            'question': created_response.data['id'],
+        }
+
+        response = self.auth_client.post(
+            self.url_flag_create,
+            data,
+            format='json',
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_201_CREATED,
+        )
+
+    def test_get_question_random_list(self):
+        """
+        Getting a random list of IDs should pass.
+        """
+
+        created_response = self.test_create_question_valid()
+
+        data = {
+            'quantity': 5
+        }
+        
+        response = self.auth_client.get(
+            self.url_random_list,
+            data,
+            format='json',
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )

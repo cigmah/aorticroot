@@ -16,36 +16,34 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework.documentation import include_docs_urls
 from rest_framework.urlpatterns import format_suffix_patterns
-import rest_framework.authtoken.views
-import tags.views
-import choices.views
-import questions.views
-import users.views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    # Tags
-    path('tag/', tags.views.TagList.as_view(), name='tag'),
-    path('tag/<int:pk>/', tags.views.TagDetail.as_view(), name='tag_id'),
-    # Choices
-    path('choice/', choices.views.ChoiceList.as_view(), name='choice'),
-    path('choice/<int:pk>/', choices.views.ChoiceDetail.as_view(), name='choice_id'),
-    # Questions
-    path('question/', questions.views.QuestionList.as_view(), name='question'),
-    path('question/<int:pk>/', questions.views.QuestionDetail.as_view(), name='question_id'),
-    path('question/random/', questions.views.QuestionRandom.as_view(), name='question_random'),
-    path('question/comment/', questions.views.QuestionCommentList.as_view(), name='question_comment'),
-    path('question/comment/<int:pk>', questions.views.QuestionCommentDetail.as_view()),
-    path('question/response/', questions.views.QuestionResponseList.as_view(), name='question_response'),
-    # Users
-    path('user/', users.views.UserGenerate.as_view(), name='user'),
-    path('user/authenticate/', rest_framework.authtoken.views.obtain_auth_token, name='user_authenticate'),
-]
-
-# For browsable API
-urlpatterns += [
-    path('api-auth', include('rest_framework.urls'))
+    path(
+        'admin/',
+        admin.site.urls
+    ),
+    path(
+        'mail/',
+        include('mail.urls'),
+    ),
+    path(
+        'notes/',
+        include('notes.urls'),
+    ),
+    path(
+        'questions/',
+        include('questions.urls'),
+    ),
+    path(
+        'users/',
+        include('users.urls'),
+    ),
+    path(
+        'docs/',
+        include_docs_urls(title='AORTA API'),
+    )
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
