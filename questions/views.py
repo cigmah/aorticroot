@@ -77,20 +77,34 @@ class QuestionRandom(generics.RetrieveAPIView):
     Retrieves a single random question.
     """
 
+    queryset = Question.objects.all()
+    serializer_class = QuestionSerializer
+
+    filter_fields = (
+        "note",
+        "note__contributor",
+        "note__year_level",
+        "note__specialty",
+        "note__domain",
+        "contributor",
+    )
+
     def retrieve(self, request, *args, **kwargs):
         """
         Takes a query parameter quantity.
-        TODO implement filtering
         TODO if user is authenticated, mix with spaced repetition
         """
 
-        question_ids = list(Question.objects.values_list("id", flat=True))
-        random_id = choice(question_ids)
-        question = Question.objects.get(id=random_id)
+        queryset = super().get_queryset()
 
-        serialized = QuestionSerializer(question)
+        question_ids = list(self.filter_queryset(self.get_queryset()).values_list("id", flat=True))
 
-        return Response(serialized.data, status=status.HTTP_200_OK)
+        if len(question_ids) > 0:
+            random_id = choice(question_ids)
+            question = Question.objects.get(id=random_id)
+            serialized = QuestionSerializer(question)
+            return Response(serialized.data, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class QuestionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
