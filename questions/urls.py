@@ -3,7 +3,7 @@ from questions.views import *
 
 urlpatterns = [
     path("", QuestionListCreate.as_view(), name="question_list_create"),
-    path("random/", QuestionRandomList.as_view(), name="question_random_list"),
+    path("random/", QuestionRandom.as_view(), name="question_random"),
     path(
         "<int:pk>/",
         QuestionRetrieveUpdateDestroy.as_view(),

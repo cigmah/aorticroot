@@ -11,7 +11,7 @@ class QuestionTest(APITestCase):
     def setUp(self):
 
         self.url_list_create = reverse("question_list_create")
-        self.url_random_list = reverse("question_random_list")
+        self.url_random = reverse("question_random")
         self.url_response_create = reverse("question_response_create")
         self.url_like_create = reverse("question_like_create")
         self.url_flag_create = reverse("question_flag_create")
@@ -144,15 +144,13 @@ class QuestionTest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_get_question_random_list(self):
+    def test_get_question_random(self):
         """
-        Getting a random list of IDs should pass.
+        Getting a random question should pass.
         """
 
         created_response = self.test_create_question_valid()
 
-        data = {"quantity": 5}
-
-        response = self.auth_client.get(self.url_random_list, data, format="json")
+        response = self.auth_client.get(self.url_random, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

@@ -1,4 +1,4 @@
-from random import sample
+from random import choice
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
@@ -67,31 +67,30 @@ class QuestionListCreate(generics.ListCreateAPIView):
         for choice in choices:
             QuestionChoice.objects.create(question=question, **choice)
 
-        data = {"id": question.id}
+        serialized = QuestionSerializer(question)
 
-        return Response(data, status=status.HTTP_201_CREATED)
+        return Response(serialized.data, status=status.HTTP_201_CREATED)
 
 
-class QuestionRandomList(generics.RetrieveAPIView):
+class QuestionRandom(generics.RetrieveAPIView):
     """
-    Retrieves a list of random question IDs.
+    Retrieves a single random question.
     """
 
     def retrieve(self, request, *args, **kwargs):
         """
         Takes a query parameter quantity.
+        TODO implement filtering
         TODO if user is authenticated, mix with spaced repetition
         """
 
-        quantity = kwargs.get("quantity", 10)
+        question_ids = list(Question.objects.values_list("id", flat=True))
+        random_id = choice(question_ids)
+        question = Question.objects.get(id=random_id)
 
-        question_ids = list(Question.objects.all().values_list("id", flat=True))
+        serialized = QuestionSerializer(question)
 
-        selected_ids = sample(question_ids, min(quantity, len(question_ids)))
-
-        data = {"ids": selected_ids}
-
-        return Response(data, status=status.HTTP_200_OK)
+        return Response(serialized.data, status=status.HTTP_200_OK)
 
 
 class QuestionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
