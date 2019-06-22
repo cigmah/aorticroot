@@ -4,5 +4,5 @@ from users.views import *
 
 urlpatterns = [
     path("", UserCreate.as_view(), name="user_create"),
-    path("authenticate/", obtain_auth_token, name="user_authenticate"),
+    path("authenticate/", Authenticate.as_view(), name="user_authenticate"),
 ]
