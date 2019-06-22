@@ -19,6 +19,7 @@ class UserCreate(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         # TODO move to serializer?
+        # TODO Validate username and email
 
         username = request.data.get("username")
         email = request.data.get("email")
