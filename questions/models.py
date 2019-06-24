@@ -8,10 +8,32 @@ class Question(models.Model):
     This module contains multiple-choice questions which are attached
     to parent notes. Each question MUST have a parent note.
     """
+    
+    # Domain constants relating to specific subclassification
+    # of notes - either foundation knowledge for practice, or
+    # relating to specific tasks of clinical practice.
+    GENERAL_DOMAIN = 0
+    FOUNDATION = 1
+    ASSESSMENT = 2
+    INVESTIGATION = 3
+    DIAGNOSIS = 4
+    MANAGEMENT = 5
+
+    # Domain choices.
+    DOMAIN_CHOICES = [
+        (GENERAL_DOMAIN, "GENERAL_DOMAIN"),
+        (FOUNDATION, "FOUNDATION"),
+        (ASSESSMENT, "ASSESSMENT"),
+        (INVESTIGATION, "INVESTIGATION"),
+        (DIAGNOSIS, "DIAGNOSIS"),
+        (MANAGEMENT, "MANAGEMENT"),
+    ]
 
     note = models.ForeignKey(Note, on_delete=models.PROTECT)
 
     contributor = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+
+    domain = models.IntegerField(choices=DOMAIN_CHOICES, default=GENERAL_DOMAIN)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -61,6 +83,9 @@ class QuestionResponse(models.Model):
     """
     This model contains responses that users give when they
     answer questions.
+
+    TODO Add necessary fields for SRS (ease, interval, due?)
+
     """
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -112,3 +137,20 @@ class QuestionFlag(models.Model):
 
     def __str__(self):
         return f"{self.user_id}--{self.question_id}"
+
+
+class QuestionComment(models.Model):
+    """
+    This model contains comments that users can add to questions.
+    """
+
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+
+    author = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    content = models.TextField()
+
+    def __str__(self):
+        return self.content

@@ -107,25 +107,6 @@ class Note(models.Model):
         (ETHICS, "ETHICS"),
     ]
 
-    # Domain constants relating to specific subclassification
-    # of notes - either foundation knowledge for practice, or
-    # relating to specific tasks of clinical practice.
-    GENERAL_DOMAIN = 0
-    FOUNDATION = 1
-    ASSESSMENT = 2
-    INVESTIGATION = 3
-    DIAGNOSIS = 4
-    MANAGEMENT = 5
-
-    # Domain choices.
-    DOMAIN_CHOICES = [
-        (GENERAL_DOMAIN, "GENERAL_DOMAIN"),
-        (FOUNDATION, "FOUNDATION"),
-        (ASSESSMENT, "ASSESSMENT"),
-        (INVESTIGATION, "INVESTIGATION"),
-        (DIAGNOSIS, "DIAGNOSIS"),
-        (MANAGEMENT, "MANAGEMENT"),
-    ]
 
     contributor = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
 
@@ -141,7 +122,6 @@ class Note(models.Model):
         choices=SPECIALTY_CHOICES, default=GENERAL_SPECIALTY
     )
 
-    domain = models.IntegerField(choices=DOMAIN_CHOICES, default=GENERAL_DOMAIN)
 
     title = models.CharField(max_length=60, unique=True)
 

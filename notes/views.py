@@ -7,6 +7,8 @@ from notes.models import *
 class NoteListCreate(generics.ListCreateAPIView):
     """
     List or create notes.
+    
+    TODO Deprecate create, should be internal only.
     """
 
     queryset = Note.objects.all().order_by("-created_at")
@@ -23,6 +25,21 @@ class NoteListCreate(generics.ListCreateAPIView):
 class NoteRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     """
     Retrieve, update or destroy a specific note.
+    
+    TODO Add missing fields.
+
+    Response: {
+        id: int,
+        title: str,
+        content: str,
+        year_level: str,
+        specialty: str,
+        due: List(int),
+        known: None if not auth else List(int),
+        comments: List(Comment),
+        created_at: str(timestamp),
+        modified_at: str(timestamp),
+    }
     """
 
     queryset = Note.objects.all()

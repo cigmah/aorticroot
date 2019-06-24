@@ -110,6 +110,22 @@ class QuestionRandom(generics.RetrieveAPIView):
 class QuestionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     """
     Retrieves, updates or deletes a question.
+    
+    TODO Add missing fields
+
+    Response: {
+        id: int,
+        specialty: Specialty, (source note__specialty)
+        year_level: YearLevel, (source note__year_level)
+        domain: Domain,
+        stem: str,
+        choices: List(Choice),
+        comments: List(Comment),
+        likes: int, 
+        liked: None if not auth else bool,
+        contributor: User,
+        created_at: str(timestamp),
+    }
     """
 
     queryset = Question.objects.all()
