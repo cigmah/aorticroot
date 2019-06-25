@@ -38,9 +38,16 @@ class NoteList(generics.ListAPIView):
 
         user = request.user
 
+        year_level = kwargs.get('year_level')
+
+        if year_level is not None:
+            note_objects = Note.objects.filter(year_level=year_level)
+        else:
+            note_objects = Note.objects
+
         # TODO more idiomatic or efficient ways to do this.
         if user.is_authenticated:
-            notes = Note.objects.annotate(
+            notes = note_objects.annotate(
                 num_questions=Count('note_question'),
                 num_comments=Count('note_comment'),
                 num_due=Count(
