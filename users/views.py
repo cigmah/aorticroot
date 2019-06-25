@@ -28,31 +28,53 @@ class UserCreate(generics.CreateAPIView):
         try:
             validate_slug(username)
         except ValidationError:
-            return Response({"invalid": "username"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"invalid": "username"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         if email is not None:
             try:
                 validate_email(email)
             except ValidationError:
-                return Response({"invalid": "email"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"invalid": "email"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
         password = User.objects.make_random_password()
 
-        user = User.objects.create_user(username, email, password=password)
+        user = User.objects.create_user(
+            username,
+            email,
+            password=password
+        )
 
         token = Token.objects.create(user=user)
 
-        data = {"username": user.username, "token": token.key, "password": password}
+        data = {
+            "username": user.username,
+            "token": token.key,
+            "password": password
+        }
 
         return Response(data, status=status.HTTP_201_CREATED)
 
 class Authenticate(ObtainAuthToken):
 
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
+
+        serialized = self.serializer_class(
+            data=request.data,
+            context={'request': request}
+        )
+
+        serialized.is_valid(raise_exception=True)
+
+        user = serialized.validated_data['user']
+
         token, created = Token.objects.get_or_create(user=user)
+
         return Response({
             'token': token.key,
             'username': user.username,

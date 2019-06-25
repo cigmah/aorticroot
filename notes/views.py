@@ -11,15 +11,27 @@ class NoteListCreate(generics.ListCreateAPIView):
     TODO Deprecate create, should be internal only.
     """
 
-    queryset = Note.objects.all().order_by("-created_at")
+    queryset = Note.objects \
+                   .all() \
+                   .order_by("-created_at")
 
     serializer_class = NoteSerializer
 
-    search_fields = ("title", "content")
+    search_fields = (
+        "title",
+        "content"
+    )
 
-    filter_fields = ("contributor", "year_level", "specialty", "domain")
+    filter_fields = (
+        "contributor",
+        "year_level",
+        "specialty",
+        "domain"
+    )
 
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+    )
 
 
 class NoteRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
@@ -46,7 +58,9 @@ class NoteRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
     serializer_class = NoteSerializer
 
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+    )
 
 
 class NoteCommentCreate(generics.CreateAPIView):
@@ -56,4 +70,6 @@ class NoteCommentCreate(generics.CreateAPIView):
 
     serializer_class = NoteCommentSerializer
 
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (
+        permissions.IsAuthenticated,
+    )

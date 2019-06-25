@@ -16,31 +16,45 @@ class Question(models.Model):
     # of notes - either foundation knowledge for practice, or
     # relating to specific tasks of clinical practice.
     GENERAL_DOMAIN = 0
-    FOUNDATION = 1
-    ASSESSMENT = 2
-    INVESTIGATION = 3
-    DIAGNOSIS = 4
-    MANAGEMENT = 5
+    FOUNDATION     = 1
+    ASSESSMENT     = 2
+    INVESTIGATION  = 3
+    DIAGNOSIS      = 4
+    MANAGEMENT     = 5
 
     # Domain choices.
     DOMAIN_CHOICES = [
-        (GENERAL_DOMAIN, "GENERAL_DOMAIN"),
-        (FOUNDATION, "FOUNDATION"),
-        (ASSESSMENT, "ASSESSMENT"),
-        (INVESTIGATION, "INVESTIGATION"),
-        (DIAGNOSIS, "DIAGNOSIS"),
-        (MANAGEMENT, "MANAGEMENT"),
+        (GENERAL_DOMAIN , "GENERAL_DOMAIN"),
+        (FOUNDATION     , "FOUNDATION"),
+        (ASSESSMENT     , "ASSESSMENT"),
+        (INVESTIGATION  , "INVESTIGATION"),
+        (DIAGNOSIS      , "DIAGNOSIS"),
+        (MANAGEMENT     , "MANAGEMENT"),
     ]
 
-    note = models.ForeignKey(Note, on_delete=models.PROTECT)
+    note = models.ForeignKey(
+        Note,
+        on_delete=models.PROTECT
+    )
 
-    contributor = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    contributor = models.ForeignKey(
+        User,
+        null=True,
+        on_delete=models.SET_NULL
+    )
 
-    domain = models.IntegerField(choices=DOMAIN_CHOICES, default=GENERAL_DOMAIN)
+    domain = models.IntegerField(
+        choices=DOMAIN_CHOICES,
+        default=GENERAL_DOMAIN
+    )
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
 
-    modified_at = models.DateTimeField(auto_now=True)
+    modified_at = models.DateTimeField(
+        auto_now=True
+    )
 
     stem = models.TextField()
 
@@ -55,12 +69,18 @@ class QuestionChoice(models.Model):
     """
 
     question = models.ForeignKey(
-        Question, related_name="question_choice", on_delete=models.CASCADE
+        Question,
+        related_name="question_choice",
+        on_delete=models.CASCADE,
     )
 
-    content = models.CharField(max_length=80)
+    content = models.CharField(
+        max_length=80
+    )
 
-    explanation = models.TextField(null=True)
+    explanation = models.TextField(
+        null=True
+    )
 
     # Enforcing that there is exactly one is_correct=True
     # row per QuestionChoice will have to be done on the
@@ -89,17 +109,32 @@ class QuestionResponse(models.Model):
 
     """
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
 
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(
+        Question,
+        on_delete=models.CASCADE
+    )
 
-    choice = models.ForeignKey(QuestionChoice, on_delete=models.CASCADE)
+    choice = models.ForeignKey(
+        QuestionChoice,
+        on_delete=models.CASCADE
+    )
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
 
-    ease = models.FloatField(default=2.5)
+    ease = models.FloatField(
+        default=2.5
+    )
 
-    interval_days = models.FloatField(default=1)
+    interval_days = models.FloatField(
+        default=1
+    )
 
     next_due_datetime = models.DateTimeField(
         default=timezone.now() + timedelta(days=1)
@@ -115,9 +150,16 @@ class QuestionLike(models.Model):
     about a question.
     """
 
-    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey(
+        User,
+        null=True,
+        on_delete=models.SET_NULL
+    )
 
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(
+        Question,
+        on_delete=models.CASCADE
+    )
 
     class Meta:
         unique_together = ("user", "question")
@@ -137,9 +179,16 @@ class QuestionFlag(models.Model):
     Alternatively, flagged questions can simply not be shown.
     """
 
-    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey(
+        User,
+        null=True,
+        on_delete=models.SET_NULL
+    )
 
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(
+        Question,
+        on_delete=models.CASCADE
+    )
 
     class Meta:
         unique_together = ("user", "question")
@@ -153,11 +202,20 @@ class QuestionComment(models.Model):
     This model contains comments that users can add to questions.
     """
 
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(
+        Question,
+        on_delete=models.CASCADE
+    )
 
-    author = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    author = models.ForeignKey(
+        User,
+        null=True,
+        on_delete=models.SET_NULL
+    )
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
 
     content = models.TextField()
 

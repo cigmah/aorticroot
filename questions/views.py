@@ -12,11 +12,17 @@ class QuestionListCreate(generics.ListCreateAPIView):
     List all questions, or create a new question.
     """
 
-    queryset = Question.objects.all().order_by("id")
+    queryset = Question.objects \
+                       .all() \
+                       .order_by("id")
 
     serializer_class = QuestionSerializer
 
-    search_fields = ("stem", "note__title", "note__content")
+    search_fields = (
+        "stem",
+        "note__title",
+        "note__content"
+    )
 
     filter_fields = (
         "note",
@@ -27,7 +33,9 @@ class QuestionListCreate(generics.ListCreateAPIView):
         "contributor",
     )
 
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+    )
 
     def create(self, request, *args, **kwargs):
         """
@@ -59,17 +67,25 @@ class QuestionListCreate(generics.ListCreateAPIView):
 
         # Add the question
         question = Question.objects.create(
-            contributor=contributor, note=note, stem=stem
+            contributor=contributor,
+            note=note,
+            stem=stem
         )
 
         # TODO Find a way to do this in bulk.
         # bulk_create() had issues.
         for choice in choices:
-            QuestionChoice.objects.create(question=question, **choice)
+            QuestionChoice.objects.create(
+                question=question,
+                **choice
+            )
 
         serialized = QuestionSerializer(question)
 
-        return Response(serialized.data, status=status.HTTP_201_CREATED)
+        return Response(
+            serialized.data,
+            status=status.HTTP_201_CREATED
+        )
 
 
 class QuestionRandom(generics.RetrieveAPIView):
@@ -97,13 +113,25 @@ class QuestionRandom(generics.RetrieveAPIView):
 
         queryset = super().get_queryset()
 
-        question_ids = list(self.filter_queryset(self.get_queryset()).values_list("id", flat=True))
+        question_ids = list(
+            self.filter_queryset(
+                self.get_queryset()
+            ).values_list("id", flat=True)
+        )
 
         if len(question_ids) > 0:
+
             random_id = choice(question_ids)
+
             question = Question.objects.get(id=random_id)
+
             serialized = QuestionSerializer(question)
-            return Response(serialized.data, status=status.HTTP_200_OK)
+
+            return Response(
+                serialized.data,
+                status=status.HTTP_200_OK
+            )
+
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
@@ -132,14 +160,18 @@ class QuestionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
     serializer_class = QuestionSerializer
 
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+    )
 
 
 class QuestionResponseCreate(generics.CreateAPIView):
 
     serializer_class = QuestionResponseSerializer
 
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (
+        permissions.IsAuthenticated,
+    )
 
 
 class QuestionLikeCreate(generics.CreateAPIView):
@@ -151,7 +183,9 @@ class QuestionLikeCreate(generics.CreateAPIView):
 
     serializer_class = QuestionLikeSerializer
 
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (
+        permissions.IsAuthenticated,
+    )
 
 
 class QuestionFlagCreate(generics.CreateAPIView):
@@ -163,4 +197,6 @@ class QuestionFlagCreate(generics.CreateAPIView):
 
     serializer_class = QuestionFlagSerializer
 
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (
+        permissions.IsAuthenticated,
+    )
