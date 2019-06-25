@@ -47,7 +47,7 @@ class UserTest(APITestCase):
 
     def test_post_user(self):
 
-        response = self.make_user_with_email(self.random_string(MAX_USERNAME_LENGTH), self.random_string(MAX_USERNAME_LENGTH).join("@test.com"))
+        response = self.make_user_with_email(self.random_string(MAX_USERNAME_LENGTH), self.random_string(MAX_USERNAME_LENGTH) + "@email.com")
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -74,7 +74,7 @@ class UserTest(APITestCase):
         # replace a random character with a space
         username=random_string.replace(random.choice(random_string), " ", 1)
 
-        response = self.make_user_with_email(username, self.random_string(MAX_USERNAME_LENGTH).join("@test.com"))
+        response = self.make_user_with_email(username, self.random_string(MAX_USERNAME_LENGTH) + "@email.com")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -88,9 +88,12 @@ class UserTest(APITestCase):
     def test_post_user_existing_username(self):
         username = self.random_string(MAX_USERNAME_LENGTH)
 
-        self.make_user_with_email(username, self.random_string(MAX_USERNAME_LENGTH).join("@test.com"))
+        self.make_user_with_email(username, self.random_string(MAX_USERNAME_LENGTH) + "@email.com")
 
-        self.assertRaises(IntegrityError, self.make_user_with_email, username=username, email=self.random_string(MAX_USERNAME_LENGTH).join("@test.com"))
+        self.assertRaises(IntegrityError,
+                          self.make_user_with_email,
+                          username=username,
+                          email=self.random_string(MAX_USERNAME_LENGTH) + "@email.com")
 
 
     # POST authenticate
@@ -99,7 +102,7 @@ class UserTest(APITestCase):
 
         username = self.random_string(MAX_USERNAME_LENGTH)
 
-        created = self.make_user_with_email(username, self.random_string(MAX_USERNAME_LENGTH).join("@test.com"))
+        created = self.make_user_with_email(username, self.random_string(MAX_USERNAME_LENGTH) + "@email.com")
 
         data = {"username": username, "password": created.data.get("password")}
 
@@ -116,7 +119,7 @@ class UserTest(APITestCase):
 
         username = self.random_string(MAX_USERNAME_LENGTH)
 
-        self.make_user_with_email(username, self.random_string(MAX_USERNAME_LENGTH).join("@test.com"))
+        self.make_user_with_email(username, self.random_string(MAX_USERNAME_LENGTH) + "@test.com")
 
         data = {"username": username, "password": self.random_string(MAX_USERNAME_LENGTH)}
 
