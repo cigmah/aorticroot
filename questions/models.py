@@ -34,7 +34,8 @@ class Question(models.Model):
 
     note = models.ForeignKey(
         Note,
-        on_delete=models.PROTECT
+        on_delete=models.PROTECT,
+        related_name='note_question',
     )
 
     contributor = models.ForeignKey(
@@ -116,7 +117,8 @@ class QuestionResponse(models.Model):
 
     question = models.ForeignKey(
         Question,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='question_response',
     )
 
     choice = models.ForeignKey(

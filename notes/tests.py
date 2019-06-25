@@ -1,15 +1,81 @@
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 from django.contrib.auth.models import User
-
+from notes.models import *
+from questions.models import *
+from datetime import timedelta
 
 class NoteTest(APITestCase):
     def setUp(self):
-        self.url_list_create = reverse("note_list_create")
+        self.url_list = reverse("note_list")
         self.url_comment_create = reverse("notecomment_create")
         self.make_auth_client()
+
+        # Create a default note
+        self.default_note = Note.objects.create(
+            contributor=None,
+            year_level=Note.GENERAL_YEAR_LEVEL,
+            specialty=Note.GENERAL_SPECIALTY,
+            title="Test title",
+            content="Test content",
+        )
+
+        # Create a default comment
+        self.default_comment = NoteComment.objects.create(
+            note=self.default_note,
+            author=None,
+            content="Test comment",
+        )
+
+        # Create a question
+        self.default_question = Question.objects.create(
+            note=self.default_note,
+            contributor=None,
+            domain=Question.GENERAL_DOMAIN,
+            stem="Test stem",
+        )
+
+        # Create a question choice
+        self.default_choice = QuestionChoice.objects.create(
+            question=self.default_question,
+            content="Test choice",
+            explanation=None,
+            is_correct=True,
+        )
+
+        # Create a default response,
+        self.default_response = QuestionResponse.objects.create(
+            user=self.user,
+            question=self.default_question,
+            choice=self.default_choice,
+        )
+
+        # Create a second question
+        self.alternative_question = Question.objects.create(
+            note=self.default_note,
+            contributor=None,
+            domain=Question.GENERAL_DOMAIN,
+            stem="Test stem 2",
+        )
+
+        # Create a second question choice
+        self.alternative_choice = QuestionChoice.objects.create(
+            question=self.alternative_question,
+            content="Test choice",
+            explanation=None,
+            is_correct=True,
+        )
+
+        # Create another response, in the past.
+        self.alternative_response = QuestionResponse.objects.create(
+            user=self.user,
+            question=self.alternative_question,
+            choice=self.alternative_choice,
+            next_due_datetime=timezone.now() - timedelta(days=2)
+        )
 
     def make_auth_client(self):
 
@@ -45,40 +111,12 @@ class NoteTest(APITestCase):
             HTTP_AUTHORIZATION="Token " + self.token
         )
 
-    def test_note_create_valid(self, title="test title"):
-        """
-        A note with valid data should be accepted.
-        """
-
-        data = {
-            "year_level": 0,
-            "specialty": 1,
-            "domain": 2,
-            "title": title,
-            "content": "test content",
-        }
-
-        response = self.auth_client.post(
-            self.url_list_create,
-            data,
-            format='json',
-        )
-
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_201_CREATED
-        )
-
-        return response
-
     def test_note_comment_create_valid(self):
         """
         A note comment with valid data should be accepted.
         """
 
-        created_response = self.test_note_create_valid("test comment")
-
-        note_id = created_response.data.get("id")
+        note_id = self.default_note.id
 
         data = {
             "note": note_id,
@@ -95,13 +133,43 @@ class NoteTest(APITestCase):
             status.HTTP_201_CREATED
         )
 
-    def test_note_list(self):
+    def test_note_list_without_authentication(self):
         """
-        Listing all notes should succeed (with pagination).
+        Listing all notes should succeed.
         """
 
-        # TODO
-        pass
+        response = self.client.get(self.url_list)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+
+    def test_note_list_with_authentication(self):
+        """
+        Getting a list of notes with authentication should return
+        extra data relating to number of questions known and due.
+        """
+
+        response = self.auth_client.get(self.url_list)
+        print(response.data)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        self.assertEqual(
+            response.data[0].get('num_due'),
+            1,
+        )
+
+        self.assertEqual(
+            response.data[0].get('num_known'),
+            1,
+        )
+
 
     def test_note_list_filtered(self):
         """
@@ -116,12 +184,12 @@ class NoteTest(APITestCase):
         A note retrieved with an ID should be accepted.
         """
 
-        created_response = self.test_note_create_valid("test retrieve id")
+        note_id = self.default_note.id
 
         response = self.client.get(
             reverse(
                 "note_retrieve_update_destroy",
-                kwargs={"pk": created_response.data["id"]},
+                kwargs={"pk": note_id},
             )
         )
 

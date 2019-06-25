@@ -4,8 +4,8 @@ from notes.views import *
 urlpatterns = [
     path(
         "",
-        NoteListCreate.as_view(),
-        name="note_list_create",
+        NoteList.as_view(),
+        name="note_list",
     ),
     path(
         "<int:pk>/",

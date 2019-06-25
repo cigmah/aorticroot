@@ -151,7 +151,8 @@ class NoteComment(models.Model):
 
     note = models.ForeignKey(
         Note,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='note_comment',
     )
 
     author = models.ForeignKey(

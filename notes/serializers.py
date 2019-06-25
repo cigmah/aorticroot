@@ -31,6 +31,18 @@ class NoteCommentSerializer(serializers.ModelSerializer):
 
 class NoteListSerializer(serializers.ModelSerializer):
 
+    num_questions = serializers.IntegerField()
+
+    num_comments = serializers.IntegerField()
+
+    num_due = serializers.IntegerField(
+        default=None
+    )
+
+    num_known = serializers.IntegerField(
+        default=None
+    )
+
     class Meta:
 
         model = Note
@@ -40,10 +52,11 @@ class NoteListSerializer(serializers.ModelSerializer):
             'title',
             'year_level',
             'specialty',
+            'modified_at',
             'num_questions',
-            'num_contributions',
+            'num_comments',
             'num_due',
-            'num_known'
+            'num_known',
         )
 
 class NoteSerializer(serializers.ModelSerializer):
