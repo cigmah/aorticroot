@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 from notes.models import Note
+from datetime import timedelta
+
 
 
 class Question(models.Model):
@@ -84,8 +87,6 @@ class QuestionResponse(models.Model):
     This model contains responses that users give when they
     answer questions.
 
-    TODO Add necessary fields for SRS (ease, interval, due?)
-
     """
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -95,6 +96,14 @@ class QuestionResponse(models.Model):
     choice = models.ForeignKey(QuestionChoice, on_delete=models.CASCADE)
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    ease = models.FloatField(default=2.5)
+
+    interval_days = models.FloatField(default=1)
+
+    next_due_datetime = models.DateTimeField(
+        default=timezone.now() + timedelta(days=1)
+    )
 
     def __str__(self):
         return f"{self.question_id}--{self.user_id}"
