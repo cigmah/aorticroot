@@ -153,7 +153,6 @@ class NoteTest(APITestCase):
         """
 
         response = self.auth_client.get(self.url_list)
-        print(response.data)
 
         self.assertEqual(
             response.status_code,
@@ -179,7 +178,7 @@ class NoteTest(APITestCase):
         # TODO
         pass
 
-    def test_note_retrieve_with_id(self):
+    def test_note_retrieve_with_id_without_auth(self):
         """
         A note retrieved with an ID should be accepted.
         """
@@ -190,10 +189,43 @@ class NoteTest(APITestCase):
             reverse(
                 "note_retrieve_update_destroy",
                 kwargs={"pk": note_id},
-            )
+            ),
+            format='json',
         )
 
         self.assertEqual(
             response.status_code,
             status.HTTP_200_OK
+        )
+
+    def test_note_retrieve_with_id_with_auth(self):
+
+        note_id = self.default_note.id
+
+        response = self.auth_client.get(
+            reverse(
+                "note_retrieve_update_destroy",
+                kwargs={"pk": note_id},
+            ),
+            format='json',
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+
+        self.assertEqual(
+            len(response.data.get('all_ids')),
+            2,
+        )
+
+        self.assertEqual(
+            len(response.data.get('due_ids')),
+            1,
+        )
+
+        self.assertEqual(
+            len(response.data.get('known_ids')),
+            1,
         )

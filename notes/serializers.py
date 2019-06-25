@@ -73,25 +73,12 @@ class NoteSerializer(serializers.ModelSerializer):
 
         model = Note
 
-        fields = "__all__"
-
-        read_only = (
-            "created_at",
-            "modified_at",
-            "comments",
-            "contributor"
+        fields = (
+            'id',
+            'title',
+            'content',
+            'comments',
+            'contributor',
+            'modified_at',
         )
 
-    def create(self, validated_data):
-        """
-        Automatically get the user from the request on creation.
-        """
-
-        contributor = self.context["request"].user
-
-        note = Note.objects.create(
-            contributor=contributor,
-            **validated_data
-        )
-
-        return note

@@ -1,5 +1,7 @@
-from django.db.models import Count, Q
+from django.db.models import Count, Q, F
 from django.utils import timezone
+from django.contrib.postgres.aggregates import ArrayAgg
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import status
@@ -7,18 +9,13 @@ from rest_framework.response import Response
 from notes.serializers import *
 from notes.models import *
 from questions.models import *
+from questions.serializers import QuestionIdSerializer
 
 
 class NoteList(generics.ListAPIView):
     """
-    List or create notes.
-    
-    TODO Deprecate create, should be internal only.
+    List notes.
     """
-
-    queryset = Note.objects \
-                   .all() \
-                   .order_by("year_level", "specialty")
 
     serializer_class = NoteListSerializer
 
@@ -48,18 +45,25 @@ class NoteList(generics.ListAPIView):
                 num_comments=Count('note_comment'),
                 num_due=Count(
                     'note_question__question_response',
-                    filter=Q(note_question__question_response__next_due_datetime__lte=timezone.now())
+                    filter=(
+                        Q(note_question__question_response__next_due_datetime__lte=timezone.now()) &
+                        Q(note_question__question_response__user=user)
+                    )
+
                 ),
                 num_known=Count(
                     'note_question__question_response',
-                    filter=Q(note_question__question_response__next_due_datetime__gt=timezone.now())
+                    filter=(
+                        Q(note_question__question_response__next_due_datetime__gt=timezone.now()) &
+                        Q(note_question__question_response__user=user)
+                    )
                 ),
-            )
+            ).order_by('specialty')
         else:
             notes = Note.objects.annotate(
                 num_questions=Count('note_question'),
                 num_comments=Count('note_comment'),
-            )
+            ).order_by('specialty')
 
         serialized = NoteListSerializer(notes, many=True)
 
@@ -69,20 +73,6 @@ class NoteRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     """
     Retrieve, update or destroy a specific note.
     
-    TODO Add missing fields.
-
-    Response: {
-        id: int,
-        title: str,
-        content: str,
-        year_level: str,
-        specialty: str,
-        due: List(int),
-        known: None if not auth else List(int),
-        comments: List(Comment),
-        created_at: str(timestamp),
-        modified_at: str(timestamp),
-    }
     """
 
     queryset = Note.objects.all()
@@ -92,6 +82,59 @@ class NoteRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
     )
+
+    def retrieve(self, request, *args, **kwargs):
+        # TODO Handle no ID
+
+        user = request.user
+
+        note_id = kwargs.get('pk')
+
+        try:
+            note = Note.objects.filter(id=note_id).get()
+        except ObjectDoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        note_serialized = NoteSerializer(note)
+
+        # Manually annotating lists of questions for now.
+        questions = Question.objects.all()
+
+        all_ids = questions.filter(note=note)
+        all_serialized = QuestionIdSerializer(all_ids, many=True)
+
+        if user.is_authenticated:
+
+            due_ids = questions.filter(
+                note=note,
+                question_response__next_due_datetime__lte=timezone.now(),
+                question_response__user=user
+            )
+            due_serialized = QuestionIdSerializer(due_ids, many=True)
+
+            known_ids = questions.filter(
+                note=note,
+                question_response__next_due_datetime__gt=timezone.now(),
+                question_response__user=user
+            )
+            known_serialized = QuestionIdSerializer(known_ids, many=True)
+
+            data = {
+                "all_ids": all_serialized.data,
+                "due_ids": due_serialized.data,
+                'known_ids': known_serialized.data,
+                **note_serialized.data
+            }
+
+        else:
+
+             data = {
+                "all_ids": all_serialized.data,
+                **note_serialized.data
+            }
+
+        return Response(data, status=status.HTTP_200_OK)
+
 
 
 class NoteCommentCreate(generics.CreateAPIView):

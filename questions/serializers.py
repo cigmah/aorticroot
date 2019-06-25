@@ -86,6 +86,15 @@ class QuestionSerializer(serializers.ModelSerializer):
             "modified_at"
         )
 
+class QuestionIdSerializer(serializers.ModelSerializer):
+
+    class Meta:
+
+        model = Question
+
+        fields = (
+            'id',
+        )
 
 class QuestionResponseSerializer(serializers.ModelSerializer):
 
