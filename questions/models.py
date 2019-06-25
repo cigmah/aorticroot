@@ -206,7 +206,8 @@ class QuestionComment(models.Model):
 
     question = models.ForeignKey(
         Question,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='question_comment'
     )
 
     author = models.ForeignKey(

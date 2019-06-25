@@ -32,4 +32,9 @@ urlpatterns = [
         QuestionFlagCreate.as_view(),
         name="question_flag_create",
     ),
+    path(
+        "comments/",
+        QuestionCommentCreate.as_view(),
+        name="question_comment_create",
+    )
 ]

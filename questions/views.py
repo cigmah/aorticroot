@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from random import choice
 from rest_framework import generics
 from rest_framework import status
@@ -29,7 +30,6 @@ class QuestionListCreate(generics.ListCreateAPIView):
         "note__contributor",
         "note__year_level",
         "note__specialty",
-        "note__domain",
         "contributor",
     )
 
@@ -48,10 +48,11 @@ class QuestionListCreate(generics.ListCreateAPIView):
         # Get the user from the request
         contributor = request.user
         note_id = request.data.get("note_id")
+        domain = request.data.get("domain")
         stem = request.data.get("stem")
         choices = request.data.get("choices")
 
-        if None in [note_id, stem, choices]:
+        if None in [note_id, domain, stem, choices]:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         # Get the note out of the request
@@ -101,7 +102,6 @@ class QuestionRandom(generics.RetrieveAPIView):
         "note__contributor",
         "note__year_level",
         "note__specialty",
-        "note__domain",
         "contributor",
     )
 
@@ -138,22 +138,7 @@ class QuestionRandom(generics.RetrieveAPIView):
 class QuestionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     """
     Retrieves, updates or deletes a question.
-    
-    TODO Add missing fields
 
-    Response: {
-        id: int,
-        specialty: Specialty, (source note__specialty)
-        year_level: YearLevel, (source note__year_level)
-        domain: Domain,
-        stem: str,
-        choices: List(Choice),
-        comments: List(Comment),
-        likes: int, 
-        liked: None if not auth else bool,
-        contributor: User,
-        created_at: str(timestamp),
-    }
     """
 
     queryset = Question.objects.all()
@@ -163,6 +148,55 @@ class QuestionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
     )
+
+    def retrieve(self, request, *args, **kwargs):
+
+        user = request.user
+
+        question_id = kwargs.get('pk')
+
+        if question_id is None:
+            return Response(status.HTTP_404_NOT_FOUND)
+
+        try:
+            question = Question.objects.filter(id=question_id).get()
+        except ObjectDoesNotExist:
+            return Response(status.HTTP_404_NOT_FOUND)
+
+        question_serialized = QuestionSerializer(question)
+
+        # TODO Possibly move to serializer
+        num_likes = QuestionLike.objects.filter(
+            question=question
+        ).count()
+
+        if user.is_authenticated:
+
+            liked = QuestionLike.objects.filter(
+                question=question,
+                user=user
+            ).exists()
+
+            num_seen = QuestionResponse.objects.filter(
+                question=question,
+                user=user
+            ).count()
+
+            data = {
+                'liked': liked,
+                'num_seen': num_seen,
+                'num_likes': num_likes,
+                **question_serialized.data
+            }
+
+        else:
+
+            data = {
+                'num_likes': num_likes,
+                **question_serialized.data
+            }
+
+        return Response(data, status=status.HTTP_200_OK)
 
 
 class QuestionResponseCreate(generics.CreateAPIView):
@@ -196,6 +230,17 @@ class QuestionFlagCreate(generics.CreateAPIView):
     """
 
     serializer_class = QuestionFlagSerializer
+
+    permission_classes = (
+        permissions.IsAuthenticated,
+    )
+
+class QuestionCommentCreate(generics.CreateAPIView):
+    """
+    Create comments on questions.
+    """
+
+    serializer_class = QuestionCommentSerializer
 
     permission_classes = (
         permissions.IsAuthenticated,

@@ -15,16 +15,40 @@ class QuestionTest(APITestCase):
         self.url_response_create = reverse("question_response_create")
         self.url_like_create = reverse("question_like_create")
         self.url_flag_create = reverse("question_flag_create")
+        self.url_comment_create = reverse("question_comment_create")
 
         self.make_auth_client()
 
-        self.note = Note.objects.create(
+        # Create a note
+        self.default_note = Note.objects.create(
             contributor=self.user,
             year_level=0,
             specialty=1,
-            domain=2,
             title="test note",
             content="test content",
+        )
+
+        # Create a question
+        self.default_question = Question.objects.create(
+            note=self.default_note,
+            contributor=None,
+            domain=Question.GENERAL_DOMAIN,
+            stem="Test stem",
+        )
+
+        # Create a question choice
+        self.default_choice = QuestionChoice.objects.create(
+            question=self.default_question,
+            content="Test choice",
+            explanation=None,
+            is_correct=True,
+        )
+
+        # Create a default response,
+        self.default_response = QuestionResponse.objects.create(
+            user=self.user,
+            question=self.default_question,
+            choice=self.default_choice,
         )
 
     def make_auth_client(self):
@@ -66,8 +90,9 @@ class QuestionTest(APITestCase):
         """
 
         data = {
-            "note_id": self.note.id,
+            "note_id": self.default_note.id,
             "stem": "test stem",
+            "domain": Question.GENERAL_DOMAIN,
             "choices": [
                 {
                     "content": "test choice",
@@ -202,4 +227,26 @@ class QuestionTest(APITestCase):
         self.assertEqual(
             response.status_code,
             status.HTTP_200_OK
+        )
+
+    def test_question_comment_create_valid(self):
+        """
+        A question comment with valid data should be accepted.
+        """
+
+        question_id = self.default_question.id
+
+        data = {
+            "question": question_id,
+            "content": "test content"
+        }
+
+        response = self.auth_client.post(
+            self.url_comment_create,
+            data
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_201_CREATED
         )
