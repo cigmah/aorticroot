@@ -129,6 +129,7 @@ class QuestionSerializer(serializers.ModelSerializer):
             'note',
             'contributor',
             'id',
+            'domain',
             'stem',
             'choices',
             'comments',
