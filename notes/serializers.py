@@ -64,9 +64,8 @@ class NoteSerializer(serializers.ModelSerializer):
     contributor = UserSerializer(required=False)
 
     comments = NoteCommentSerializer(
-        source="notecomment_set",
+        source="note_comment",
         many=True,
-        required=False
     )
 
     class Meta:
