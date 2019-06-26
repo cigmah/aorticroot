@@ -8,7 +8,7 @@ def add_notes_from_file(filename, year_level):
     with open(filename) as infile:
         data = infile.readlines()
 
-    adder = 'Note.objects.create(year_level=Note.{year_level}, specialty=Note.{specialty}, title="{title}", content="")\n'
+    adder = 'Note.objects.get_or_create(year_level=Note.{year_level}, specialty=Note.{specialty}, title="{title}", content="")\n'
 
     for line in data:
         print(line)
