@@ -10,10 +10,10 @@ PAEDIATRICS, Approach to Fever (Children)
 PAEDIATRICS, Approach to Vomiting (Children)
 PAEDIATRICS, Approach to Diarrhoea (Children)
 PAEDIATRICS, Approach to Abdominal Pain (Children)
-PAEDIATRICS, Approach to Masses, Swellings, Lumps (Children)
+PAEDIATRICS, Approach to Masses and Swellings and Lumps (Children)
 PAEDIATRICS, Approach to Rashes and Skin Lesions (Children)
 PAEDIATRICS, Approach to Gait Abnormalities (Children)
-PAEDIATRICS, Approach to Accidents, Injuries and Poisoning (Children)
+PAEDIATRICS, Approach to Accidents and Injuries and Poisoning (Children)
 PAEDIATRICS, Approach to Seizures (Children)
 PAEDIATRICS, Approach to Bruising and Easy Bleeding (Children)
 PAEDIATRICS, Approach to Visual Disturbances (Children)
@@ -30,7 +30,6 @@ PAEDIATRICS, Infectious Diseases (Children)
 PAEDIATRICS, Skin Disorders (Children)
 PAEDIATRICS, Eye Disorders (Children)
 PAEDIATRICS, Behavioural Disorders (Children)
-
 OBGYN, Disorders of Genital Tract Development
 OBGYN, The Menstrual Cycle
 OBGYN, Menstrual Disorders
@@ -91,36 +90,69 @@ OBGYN, Vaginal Repair
 OBGYN, Cervical Screening
 OBGYN, HPV Vaccination
 OBGYN, Gynaecological Oncology
-
-Prescribing in General Practice
-Ear Examination
-ENT Disorders
-Eye Examination
-Eye Disorders
-Skin Disorders
-Musculoskeletal Examination
-Suturing
-Basic Life Support
-Swabs and Biopsies
-Ear Syringing
-Approach to Tiredness and Fatigue
-Approach to Weight Change
-Approach to Abdominal Pain
-Approach to Chest Pain
-Approach to Headache
-Emergencies in General Practice
-Children's Health
-Adolescent Health
-Chronic Disease Management
-Disability
-Drug and Alcohol
-Family Abuse
-Aging
-Men's Health
-Women's Health
-Mental Health
-Multicultural Care
-Musculoskeletal Disorders
-Palliative Care
-Preventive Health
-Respiratory Disorders
+GENERAL_PRACTICE, Approach to Tiredness and Fatigue
+GENERAL_PRACTICE, Approach to Weight Change
+GENERAL_PRACTICE, Approach to Abdominal Pain
+GENERAL_PRACTICE, Approach to Chest Pain
+GENERAL_PRACTICE, Approach to Headache
+GENERAL_PRACTICE, Prescribing in General Practice
+GENERAL_PRACTICE, ENT Disorders
+GENERAL_PRACTICE, Ear Examination
+GENERAL_PRACTICE, Eye Disorders
+GENERAL_PRACTICE, Eye Examination
+GENERAL_PRACTICE, Skin Disorders
+GENERAL_PRACTICE, Musculoskeletal Disorders
+GENERAL_PRACTICE, Musculoskeletal Examination
+GENERAL_PRACTICE, Respiratory Disorders
+GENERAL_PRACTICE, Suturing
+GENERAL_PRACTICE, Basic Life Support
+GENERAL_PRACTICE, Swabs and Biopsies
+GENERAL_PRACTICE, Ear Syringing
+GENERAL_PRACTICE, Emergencies in General Practice
+GENERAL_PRACTICE, Children's Health
+GENERAL_PRACTICE, Adolescent Health
+GENERAL_PRACTICE, Men's Health
+GENERAL_PRACTICE, Women's Health
+GENERAL_PRACTICE, Mental Health
+GENERAL_PRACTICE, Travel Medicine
+GENERAL_PRACTICE, Multicultural Care
+GENERAL_PRACTICE, Preventive Health
+GENERAL_PRACTICE, Family Abuse
+GENERAL_PRACTICE, Drug and Alcohol
+GENERAL_PRACTICE, Chronic Disease Management
+GENERAL_PRACTICE, Aging
+GENERAL_PRACTICE, Disability
+GENERAL_PRACTICE, Palliative Care
+PSYCHIATRY, Taking a History (Psychiatry)
+PSYCHIATRY, The Mental State Examination
+PSYCHIATRY, Physical Examination Related to Psychiatry
+PSYCHIATRY, The Risk Assessment
+PSYCHIATRY, The Biopsychosocial Model and the Formulation
+PSYCHIATRY, The Mental Health Act
+PSYCHIATRY, Psychopharmacology
+PSYCHIATRY, Psychotherapy
+PSYCHIATRY, Assessment Tools in Psychiatry
+PSYCHIATRY, Assessment of Delirium
+PSYCHIATRY, Assessment of Suicidality
+PSYCHIATRY, Assessment of Demoralisation
+PSYCHIATRY, Organic Disorders in Psychiatry
+PSYCHIATRY, Schizophrenia Spectrum and Psychotic Disorders
+PSYCHIATRY, Bipolar and Related Disorders
+PSYCHIATRY, Depressive Disorders
+PSYCHIATRY, Anxiety Disorders
+PSYCHIATRY, Obsessive-Compulsive and Related Disorders
+PSYCHIATRY, Trauma and Stressor-Related Disorders
+PSYCHIATRY, Dissociative Disorders
+PSYCHIATRY, Somatic Symptom and Related Disorders
+PSYCHIATRY, Feeding and Eating Disorders
+PSYCHIATRY, Neurodevelopmental Disorders
+PSYCHIATRY, Elimination Disorders
+PSYCHIATRY, Sleep-Wake Disorders
+PSYCHIATRY, Disruptive and Impulse-Control and Conduct Disorders
+PSYCHIATRY, Substance-Related and Addictive Disorders
+PSYCHIATRY, Neurocognitive Disorders
+PSYCHIATRY, Personality Disorders
+PSYCHIATRY, Depression and Anxiety in the Elderly
+PSYCHIATRY, Perinatal Psychiatry
+PSYCHIATRY, Grief
+PSYCHIATRY, Psychiatry in Specific Populations

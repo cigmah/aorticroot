@@ -17,7 +17,11 @@ class NoteList(generics.ListAPIView):
     List notes.
     """
 
+    queryset = Note.objects.all()
+
     serializer_class = NoteListSerializer
+
+    lookup_url_kwarg = 'year_level'
 
     search_fields = (
         "title",
@@ -34,16 +38,23 @@ class NoteList(generics.ListAPIView):
         permissions.IsAuthenticatedOrReadOnly,
     )
 
+    def get_queryset(self):
+        # TODO More idiomatic way to filter by year level
+
+        queryset = self.queryset
+
+        maybe_year_level = self.request.GET.get('year_level')
+
+        if maybe_year_level is not None:
+            queryset = self.queryset.filter(year_level=maybe_year_level)
+
+        return queryset
+
     def list(self, request, *args, **kwargs):
 
         user = request.user
 
-        year_level = kwargs.get('year_level')
-
-        if year_level is not None:
-            note_objects = Note.objects.filter(year_level=year_level)
-        else:
-            note_objects = Note.objects
+        note_objects = self.get_queryset()
 
         # TODO more idiomatic or efficient ways to do this.
         if user.is_authenticated:
@@ -67,7 +78,7 @@ class NoteList(generics.ListAPIView):
                 ),
             ).order_by('specialty')
         else:
-            notes = Note.objects.annotate(
+            notes = note_objects.annotate(
                 num_questions=Count('note_question'),
                 num_comments=Count('note_comment'),
             ).order_by('specialty')
