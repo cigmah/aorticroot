@@ -130,18 +130,22 @@ class QuestionTest(APITestCase):
         Getting a question by ID should pass.
         """
 
-        created_response = self.test_create_question_valid()
-
         response = self.client.get(
             reverse(
                 "question_retrieve_update_destroy",
-                kwargs={"pk": created_response.data["id"]},
-            )
+                kwargs={"pk": self.default_question.id},
+            ),
+            format='json',
         )
 
         self.assertEqual(
             response.status_code,
             status.HTTP_200_OK
+        )
+
+        self.assertIn(
+            'num_chosen',
+            response.data.get("choices")[0],
         )
 
         return response

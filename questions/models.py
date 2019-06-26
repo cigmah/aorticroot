@@ -123,7 +123,8 @@ class QuestionResponse(models.Model):
 
     choice = models.ForeignKey(
         QuestionChoice,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='choice_response',
     )
 
     created_at = models.DateTimeField(

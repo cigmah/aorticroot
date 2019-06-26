@@ -10,11 +10,16 @@ from notes.models import Note
 
 class QuestionChoiceSerializer(serializers.ModelSerializer):
 
+    num_chosen = serializers.SerializerMethodField()
+
     class Meta:
 
         model = QuestionChoice
 
         fields = "__all__"
+
+    def get_num_chosen(self, object):
+        return object.choice_response.count()
 
 class QuestionCommentSerializer(serializers.ModelSerializer):
 
