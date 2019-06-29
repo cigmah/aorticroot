@@ -135,11 +135,11 @@ USE_TZ = True
 
 APPEND_SLASH = True
 
-CORS_ORIGIN_ALLOW_ALL = False
-CORS_ORIGIN_WHITELIST = (
-    'http://localhost:3000',
-    'https://cigmah.github.io',
-)
+CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_WHITELIST = (
+#     'http://localhost:3000',
+#     'https://cigmah.github.io',
+# )
 
 
 # Static files (CSS, JavaScript, Images)
