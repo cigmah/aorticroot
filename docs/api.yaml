@@ -106,29 +106,9 @@ paths:
           content:
             application/json:
                 schema:
-                  properties:
-                    id:
-                      type: integer
-                    title:
-                      type: string
-                    year_level:
-                      type: integer
-                    specialty:
-                      type: integer
-                    num_questions:
-                      description: The total number of questions under this note.
-                      type: integer
-                    num_comments:
-                      description: The total number of comments under this note.
-                      type: integer
-                    num_due:
-                      description: The number of questions which have never been reviewer or are due.
-                      type: integer
-                      nullable: true
-                    num_known:
-                      description: The number of questions which have been reviewed and are not yet due. If the user is not authenticated, then this defaults to null.
-                      type: integer
-                      nullable: true
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Note'
   /notes/{id}/:
     get:
       description: |
@@ -699,6 +679,24 @@ components:
         commentList:
           $ref: '#/components/schemas/Comment'
         username:
+          type: string
+    Note:
+      properties:
+        id:
+          type: integer
+        contributor:
+          type: integer
+        created_at:
+          type: string
+        modified_at:
+          type: string
+        year_level:
+          $ref: '#/components/schemas/YearLevel'
+        specialty:
+          type: integer
+        title:
+          type: string
+        content:
           type: string
   securitySchemes:
     ApiKey:
