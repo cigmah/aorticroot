@@ -7,6 +7,12 @@ from django.contrib.auth.models import User
 from notes.models import *
 from questions.models import *
 from datetime import timedelta
+import random
+
+MIN_YEAR_LEVEL = 0
+MAX_YEAR_LEVEL = 5
+MIN_SPECIALTY = 0
+MAX_SPECIALTY = 28
 
 class NoteTest(APITestCase):
     def setUp(self):
@@ -22,6 +28,7 @@ class NoteTest(APITestCase):
             title="Test title",
             content="Test content",
         )
+
 
         # Create a default comment
         self.default_comment = NoteComment.objects.create(
@@ -175,8 +182,61 @@ class NoteTest(APITestCase):
         Listing all notes with a filter should succeed (with pagination).
         """
 
+        # Create 60 notes
+        for i in range((MAX_YEAR_LEVEL-MIN_YEAR_LEVEL+1)*10):
+            Note.objects.create(
+                contributor=None,
+                year_level=random.randint(MIN_YEAR_LEVEL, MAX_YEAR_LEVEL),
+                specialty=random.randint(MIN_SPECIALTY, MAX_SPECIALTY),
+                title=i,
+                content="",
+            )
+
         # TODO
-        pass
+        for i in range(MIN_SPECIALTY, MAX_YEAR_LEVEL+1):
+            response = self.client.get(
+                reverse("note_list"),{"year_level":i}
+            )
+
+            self.assertEqual(
+                response.status_code,
+                status.HTTP_200_OK
+            )
+
+            for note in response.data:
+                self.assertEqual(note["year_level"], i)
+
+    # test out year level outside of defined levels
+    def test_note_list_filtered_invalid_year_level(self):
+        response_one_less = self.client.get(
+            reverse("note_list"), {"year_level": MIN_YEAR_LEVEL-1}
+        )
+
+        self.assertEqual(
+            response_one_less.status_code,
+            status.HTTP_200_OK
+        )
+
+        self.assertEqual(
+            len(response_one_less.data),
+            0
+        )
+
+        response_one_more = self.client.get(
+            reverse("note_list"), {"year_level": MAX_YEAR_LEVEL+1}
+        )
+
+        self.assertEqual(
+            response_one_more.status_code,
+            status.HTTP_200_OK
+        )
+
+        self.assertEqual(
+            len(response_one_more.data),
+            0
+        )
+
+
 
     def test_note_retrieve_with_id_without_auth(self):
         """
