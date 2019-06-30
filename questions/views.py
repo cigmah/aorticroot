@@ -164,7 +164,12 @@ class QuestionRandomList(generics.RetrieveAPIView):
             ).values_list("id", flat=True)
         )
 
-        quantity = kwargs.get("quantity", 10)
+        quantity_string = self.request.GET.get("quantity")
+
+        if quantity_string is not None:
+            quantity = int(quantity_string)
+        else:
+            quantity = 10 # default to 10 random questions
 
         selected_ids = sample(question_ids, min(quantity, len(question_ids)))
 
