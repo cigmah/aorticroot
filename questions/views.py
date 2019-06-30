@@ -1,5 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
-from random import choice
+from random import choice, sample
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
@@ -133,6 +133,43 @@ class QuestionRandom(generics.RetrieveAPIView):
             )
 
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+class QuestionRandomList(generics.RetrieveAPIView):
+    """
+    Retrieves a list of random question IDs.
+    """
+
+    queryset = Question.objects.all()
+    serializer_class = QuestionSerializer
+
+    filter_fields = (
+        "note",
+        "note__contributor",
+        "note__year_level",
+        "note__specialty",
+        "contributor",
+    )
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Takes a query parameter quantity.
+        TODO if user is authenticated, mix with spaced repetition
+        """
+
+        queryset = super().get_queryset()
+
+        question_ids = list(
+            self.filter_queryset(
+                self.get_queryset()
+            ).values_list("id", flat=True)
+        )
+
+        quantity = kwargs.get("quantity", 10)
+
+        selected_ids = sample(question_ids, min(quantity, len(question_ids)))
+
+
+        return Response(selected_ids, status=status.HTTP_200_OK)
 
 
 class QuestionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):

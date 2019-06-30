@@ -13,6 +13,11 @@ urlpatterns = [
         name="question_random",
     ),
     path(
+        "random_list/",
+        QuestionRandomList.as_view(),
+        name="question_random_list"
+    ),
+    path(
         "<int:pk>/",
         QuestionRetrieveUpdateDestroy.as_view(),
         name="question_retrieve_update_destroy",
