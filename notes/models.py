@@ -130,7 +130,7 @@ class Note(models.Model):
     )
 
     title = models.CharField(
-        max_length=60,
+        max_length=80,
         unique=True
     )
 
