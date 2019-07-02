@@ -123,8 +123,8 @@ class NoteRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
         # Manually annotating lists of questions for now.
         questions = Question.objects.all()
 
-        all_ids = questions.filter(note=note)
-        all_serialized = QuestionIdSerializer(all_ids, many=True)
+        all_ids = questions.filter(note=note).values('id')
+        #all_serialized = QuestionIdSerializer(all_ids, many=True)
 
         if user.is_authenticated:
 
@@ -132,27 +132,27 @@ class NoteRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
                 note=note,
                 question_response__next_due_datetime__lte=timezone.now(),
                 question_response__user=user
-            )
-            due_serialized = QuestionIdSerializer(due_ids, many=True)
+            ).values('id').distinct()
+            #due_serialized = QuestionIdSerializer(due_ids, many=True)
 
             known_ids = questions.filter(
                 note=note,
                 question_response__next_due_datetime__gt=timezone.now(),
                 question_response__user=user
-            )
-            known_serialized = QuestionIdSerializer(known_ids, many=True)
+            ).values('id').distinct()
+            #known_serialized = QuestionIdSerializer(known_ids, many=True)
 
             data = {
-                "all_ids": all_serialized.data,
-                "due_ids": due_serialized.data,
-                'known_ids': known_serialized.data,
+                "all_ids": all_ids,
+                "due_ids": due_ids,
+                'known_ids': known_ids,
                 **note_serialized.data
             }
 
         else:
 
              data = {
-                "all_ids": all_serialized.data,
+                "all_ids": all_ids,
                 **note_serialized.data
             }
 

@@ -178,7 +178,13 @@ class QuestionResponseSerializer(serializers.ModelSerializer):
         )
 
     def calculate_new_ease(self, old_ease, q):
-        return old_ease - 0.8 + (0.28 * q - 0.02 * q * q)
+        # return old_ease - 0.8 + (0.28 * q - 0.02 * q * q)
+        # Supposedley
+        if q > 0:
+            return old_ease + 0.1
+        else:
+            return max(old_ease - 0.8, 1.3)
+
 
     def create(self, validated_data):
         """
@@ -195,7 +201,7 @@ class QuestionResponseSerializer(serializers.ModelSerializer):
         except ObjectDoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        correct = validated_data.get("choice") ==  correct_choice.id
+        correct = validated_data.get("choice").id ==  correct_choice.id
 
         try:
             last = QuestionResponse.objects.filter(
@@ -203,22 +209,37 @@ class QuestionResponseSerializer(serializers.ModelSerializer):
                 user=user
             ).order_by('-next_due_datetime')[0]
 
-            new_interval = last.interval_days * last.ease
+            # Only modify if it was due before today
+            if last.next_due_datetime < timezone.now():
 
-            if correct:
-                new_ease = self.calculate_new_ease(last.ease, 3)
+                new_interval = last.interval_days * last.ease
+
+                if correct:
+                    new_ease = self.calculate_new_ease(last.ease, 5)
+                else:
+                    new_ease = self.calculate_new_ease(last.ease, 0)
+
+                next_due_datetime = timezone.now() + timedelta(days=new_interval)
+
             else:
-                new_ease = self.calculate_new_ease(last.ease, 0)
+                new_ease = last.ease
+                new_interval = last.interval_days
+                next_due_datetime = last.next_due_datetime
 
         except IndexError:
-            new_interval = 1
-            new_ease = 2.5
+            if correct:
+                new_interval = 1
+                new_ease = self.calculate_new_ease(2.5, 5)
+            else:
+                new_interval = 0.5
+                new_ease = self.calculate_new_ease(2.5, 0)
 
-        next_due_datetime = timezone.now() + timedelta(days=new_interval)
+            next_due_datetime = timezone.now() + timedelta(days=new_interval)
 
         response = QuestionResponse.objects.create(
             user=user,
             interval_days=new_interval,
+            ease=new_ease,
             next_due_datetime=next_due_datetime,
             **validated_data
         )
