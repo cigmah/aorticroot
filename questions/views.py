@@ -28,8 +28,10 @@ class QuestionListCreate(generics.ListCreateAPIView):
     filter_fields = (
         "note",
         "note__contributor",
-        "note__year_level",
+        "domain",
+        "year_level",
         "note__specialty",
+        "note__topic",
         "contributor",
     )
 
@@ -100,8 +102,10 @@ class QuestionRandom(generics.RetrieveAPIView):
     filter_fields = (
         "note",
         "note__contributor",
-        "note__year_level",
+        "note__topic",
         "note__specialty",
+        "year_level",
+        "domain",
         "contributor",
     )
 
@@ -145,7 +149,9 @@ class QuestionRandomList(generics.RetrieveAPIView):
     filter_fields = (
         "note",
         "note__contributor",
-        "note__year_level",
+        "year_level",
+        "domain",
+        "note__topic",
         "note__specialty",
         "contributor",
     )
@@ -207,11 +213,6 @@ class QuestionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
         question_serialized = QuestionSerializer(question)
 
-        # TODO Possibly move to serializer
-        num_likes = QuestionLike.objects.filter(
-            question=question
-        ).count()
-
         if user.is_authenticated:
 
             liked = QuestionLike.objects.filter(
@@ -227,14 +228,12 @@ class QuestionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
             data = {
                 'liked': liked,
                 'num_seen': num_seen,
-                'num_likes': num_likes,
                 **question_serialized.data
             }
 
         else:
 
             data = {
-                'num_likes': num_likes,
                 **question_serialized.data
             }
 

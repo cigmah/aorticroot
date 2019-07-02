@@ -109,9 +109,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         many=True,
     )
 
-    num_likes = serializers.IntegerField(
-        default=None
-    )
+    num_likes = serializers.SerializerMethodField()
 
     liked = serializers.BooleanField(
         default=None
@@ -130,6 +128,7 @@ class QuestionSerializer(serializers.ModelSerializer):
             'contributor',
             'id',
             'domain',
+            'year_level',
             'stem',
             'choices',
             'comments',
@@ -138,6 +137,9 @@ class QuestionSerializer(serializers.ModelSerializer):
             'num_seen',
             'modified_at'
         )
+
+    def get_num_likes(self, object):
+        return object.question_like.count()
 
 class QuestionIdSerializer(serializers.ModelSerializer):
 

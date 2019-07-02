@@ -169,7 +169,7 @@ class QuestionResponse(models.Model):
     )
 
     def __str__(self):
-        return f"{self.question_id}--{self.user_id}"
+        return f"{self.question}--{self.user}"
 
 
 class QuestionLike(models.Model):
@@ -186,14 +186,15 @@ class QuestionLike(models.Model):
 
     question = models.ForeignKey(
         Question,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name="question_like"
     )
 
     class Meta:
         unique_together = ("user", "question")
 
     def __str__(self):
-        return f"{self.user_id}--{self.question_id}"
+        return f"{self.user}--{self.question}"
 
 
 class QuestionFlag(models.Model):
@@ -222,7 +223,7 @@ class QuestionFlag(models.Model):
         unique_together = ("user", "question")
 
     def __str__(self):
-        return f"{self.user_id}--{self.question_id}"
+        return f"{self.user}--{self.question}"
 
 
 class QuestionComment(models.Model):

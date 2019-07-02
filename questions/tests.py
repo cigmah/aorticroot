@@ -19,20 +19,32 @@ class QuestionTest(APITestCase):
 
         self.make_auth_client()
 
-        # Create a note
-        self.default_note = Note.objects.create(
-            contributor=self.user,
-            year_level=0,
-            specialty=1,
-            title="test note",
-            content="test content",
-        )
+        # Initialise notes
+        for specialty in Note.SPECIALTY_CHOICES:
+            for topic in Note.TOPIC_CHOICES:
+
+                title = (
+                    specialty[1].lower().replace("_"," ").title() +
+                    " - " +
+                    topic[1].lower().replace("_", " ").title()
+                )
+
+                Note.objects.get_or_create(
+                    specialty=specialty[0],
+                    topic=topic[0],
+                    title=title,
+                    content="",
+                )
+
+
+        self.default_note = Note.objects.filter(id=1).get()
 
         # Create a question
         self.default_question = Question.objects.create(
             note=self.default_note,
             contributor=None,
             domain=Question.GENERAL_DOMAIN,
+            year_level=Question.GENERAL_YEAR_LEVEL,
             stem="Test stem",
         )
 
@@ -93,6 +105,7 @@ class QuestionTest(APITestCase):
             "note_id": self.default_note.id,
             "stem": "test stem",
             "domain": Question.GENERAL_DOMAIN,
+            "year_level": Question.GENERAL_YEAR_LEVEL,
             "choices": [
                 {
                     "content": "test choice",

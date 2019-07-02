@@ -69,8 +69,6 @@ class NoteList(generics.ListAPIView):
         # TODO more idiomatic or efficient ways to do this.
         if user.is_authenticated:
             notes = note_objects.annotate(
-                num_questions=Count('note_question'),
-                num_comments=Count('note_comment'),
                 num_due=Count(
                     'note_question__question_response',
                     filter=(
@@ -86,12 +84,9 @@ class NoteList(generics.ListAPIView):
                         Q(note_question__question_response__user=user)
                     )
                 ),
-            ).order_by('specialty')
+            ).order_by('specialty', 'topic')
         else:
-            notes = note_objects.annotate(
-                num_questions=Count('note_question'),
-                num_comments=Count('note_comment'),
-            ).order_by('specialty')
+            notes = note_objects.annotate().order_by('specialty', 'topic')
 
         serialized = NoteListSerializer(notes, many=True)
 

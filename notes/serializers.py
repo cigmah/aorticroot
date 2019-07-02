@@ -31,9 +31,9 @@ class NoteCommentSerializer(serializers.ModelSerializer):
 
 class NoteListSerializer(serializers.ModelSerializer):
 
-    num_questions = serializers.IntegerField()
+    num_questions = serializers.SerializerMethodField()
 
-    num_comments = serializers.IntegerField()
+    num_comments = serializers.SerializerMethodField()
 
     num_due = serializers.IntegerField(
         default=None
@@ -58,6 +58,12 @@ class NoteListSerializer(serializers.ModelSerializer):
             'num_due',
             'num_known',
         )
+
+    def get_num_questions(self, object):
+        return object.note_question.count()
+
+    def get_num_comments(self, object):
+        return object.note_comment.count()
 
 class NoteSerializer(serializers.ModelSerializer):
 

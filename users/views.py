@@ -33,7 +33,7 @@ class UserCreate(generics.CreateAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        if email is not None:
+        if email is not None and email != "":
             try:
                 validate_email(email)
             except ValidationError:
