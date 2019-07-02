@@ -27,7 +27,6 @@ class NoteList(generics.ListAPIView):
     )
 
     filter_fields = (
-        "contributor",
         "specialty",
         "topic",
     )
@@ -35,6 +34,31 @@ class NoteList(generics.ListAPIView):
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
     )
+
+    def get_queryset(self):
+
+        specialty_filter = self.request.GET.get("specialty")
+        topic_filter = self.request.GET.get("topic")
+        search_filter = self.request.GET.get("search")
+
+        queryset = self.queryset
+
+        filters = {}
+        
+        if specialty_filter is not None:
+            filters["specialty"] = int(specialty_filter)
+        if topic_filter is not None:
+            filters["topic"] = int(topic_filter)
+
+        queryset = queryset.filter(**filters)
+
+        if search_filter is not None:
+            queryset = queryset.filter(
+                Q(title__icontains=search_filter) |
+                Q(content__icontains=search_filter)
+            )
+
+        return queryset
 
     def list(self, request, *args, **kwargs):
 

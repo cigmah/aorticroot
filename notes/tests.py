@@ -7,12 +7,8 @@ from django.contrib.auth.models import User
 from notes.models import *
 from questions.models import *
 from datetime import timedelta
+from scripts import adders
 import random
-
-MIN_YEAR_LEVEL = 0
-MAX_YEAR_LEVEL = 5
-MIN_SPECIALTY = 0
-MAX_SPECIALTY = 28
 
 class NoteTest(APITestCase):
     def setUp(self):
@@ -20,15 +16,25 @@ class NoteTest(APITestCase):
         self.url_comment_create = reverse("notecomment_create")
         self.make_auth_client()
 
-        # Create a default note
-        self.default_note = Note.objects.create(
-            contributor=None,
-            year_level=Note.GENERAL_YEAR_LEVEL,
-            specialty=Note.GENERAL_SPECIALTY,
-            title="Test title",
-            content="Test content",
-        )
+        # Initialise notes
+        for specialty in Note.SPECIALTY_CHOICES:
+            for topic in Note.TOPIC_CHOICES:
 
+                title = (
+                    specialty[1].lower().replace("_"," ").title() +
+                    " - " +
+                    topic[1].lower().replace("_", " ").title()
+                )
+
+                Note.objects.get_or_create(
+                    specialty=specialty[0],
+                    topic=topic[0],
+                    title=title,
+                    content="",
+                )
+
+        # Create a default note
+        self.default_note = Note.objects.filter(id=1).get()
 
         # Create a default comment
         self.default_comment = NoteComment.objects.create(
@@ -182,20 +188,9 @@ class NoteTest(APITestCase):
         Listing all notes with a filter should succeed (with pagination).
         """
 
-        # Create 60 notes
-        for i in range((MAX_YEAR_LEVEL-MIN_YEAR_LEVEL+1)*10):
-            Note.objects.create(
-                contributor=None,
-                year_level=random.randint(MIN_YEAR_LEVEL, MAX_YEAR_LEVEL),
-                specialty=random.randint(MIN_SPECIALTY, MAX_SPECIALTY),
-                title=i,
-                content="",
-            )
-
-        # TODO
-        for i in range(MIN_SPECIALTY, MAX_YEAR_LEVEL+1):
+        for specialty in Note.SPECIALTY_CHOICES:
             response = self.client.get(
-                reverse("note_list"),{"year_level":i}
+                reverse("note_list"),{"specialty":specialty[0]}
             )
 
             self.assertEqual(
@@ -204,26 +199,15 @@ class NoteTest(APITestCase):
             )
 
             for note in response.data:
-                self.assertEqual(note["year_level"], i)
+                self.assertEqual(note["specialty"], specialty[0])
 
     # test out year level outside of defined levels
-    def test_note_list_filtered_invalid_year_level(self):
-        response_one_less = self.client.get(
-            reverse("note_list"), {"year_level": MIN_YEAR_LEVEL-1}
-        )
+    def test_note_list_filtered_invalid_specialty(self):
 
-        self.assertEqual(
-            response_one_less.status_code,
-            status.HTTP_200_OK
-        )
-
-        self.assertEqual(
-            len(response_one_less.data),
-            0
-        )
+        num_specialties =len( Note.SPECIALTY_CHOICES)
 
         response_one_more = self.client.get(
-            reverse("note_list"), {"year_level": MAX_YEAR_LEVEL+1}
+            reverse("note_list"), {"specialty": num_specialties+1}
         )
 
         self.assertEqual(
@@ -235,8 +219,6 @@ class NoteTest(APITestCase):
             len(response_one_more.data),
             0
         )
-
-
 
     def test_note_retrieve_with_id_without_auth(self):
         """

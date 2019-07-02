@@ -75,8 +75,8 @@ class NoteSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'title',
-            'year_level',
             'specialty',
+            'topic',
             'content',
             'comments',
             'contributor',

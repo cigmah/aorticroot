@@ -107,6 +107,7 @@ class Note(models.Model):
     contributor = models.ForeignKey(
         User,
         null=True,
+        blank=True,
         on_delete=models.SET_NULL
     )
 
