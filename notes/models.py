@@ -16,95 +16,91 @@ class Note(models.Model):
     # table, but the logic overhead for joining across tables and
     # supporting ad-hoc creation was deemed unnecessary.
 
-    # Year level constants are specified here for reuse
-    # when this module is imported. It's verbose, but keeps the
-    # hardcoding within this module only.
-    GENERAL_YEAR_LEVEL = 0
-    YEAR_1             = 1
-    YEAR_2A            = 2
-    YEAR_3B            = 3
-    YEAR_4C            = 4
-    YEAR_5D            = 5
-
-    # Year level choices
-    YEAR_LEVEL_CHOICES = [
-        (GENERAL_YEAR_LEVEL , "GENERAL_YEAR_LEVEL"),
-        (YEAR_1             , "YEAR_1"),
-        (YEAR_2A            , "YEAR_2A"),
-        (YEAR_3B            , "YEAR_3B"),
-        (YEAR_4C            , "YEAR_4C"),
-        (YEAR_5D            , "YEAR_5D"),
-    ]
-
     # Specialty constants. These specialties
     # are based on the groupings of our curriculum
     # guides for each year.
     # The boilerplate is high, but this should be a one-time
     # cost.
-    GENERAL_SPECIALTY  = 0
-    ANATOMY            = 1
-    PHYSIOLOGY         = 2
-    BIOCHEMISTRY       = 3
-    GENETICS           = 4
-    PHARMACOLOGY       = 5
-    PSYCHOLOGY         = 6
-    MICROBIOLOGY       = 7
-    SOCIAL_ISSUES      = 8
-    POPULATION_HEALTH  = 9
-    CLINICAL_SKILLS    = 10
-    CARDIOVASCULAR     = 11
-    RESPIRATORY        = 12
-    GASTROINTESTINAL   = 13
-    HEPATOBILIARY      = 14
-    GENITOURINARY      = 15
-    ENDOCRINE          = 16
-    NEUROLOGICAL       = 17
-    MUSCULOSKELETAL    = 18
-    HAEMATOLOGICAL     = 19
-    INFECTIOUS_DISEASE = 20
-    DERMATOLOGICAL     = 21
-    PATHOLOGY          = 22
-    GENERAL_PRACTICE   = 23
-    PSYCHIATRY         = 24
-    OBGYN              = 25
-    PAEDIATRICS        = 26
-    LAW                = 27
-    ETHICS             = 28
+    #
+    #
+    PRINCIPLES                          = 0
+    CARDIOVASCULAR                      = 1
+    RESPIRATORY                         = 2
+    GASTROINTESTINAL                    = 3
+    RENAL_AND_UROLOGICAL                = 4
+    MUSCULOSKELETAL_AND_RHEUMATOLOGICAL = 5
+    NEUROLOGICAL                        = 6
+    HAEMATOLOGICAL                      = 7
+    ENDOCRINE                           = 8
+    MENTAL_AND_BEHAVIOURAL              = 9
+    OBSTETRIC_AND_GYNAECOLOGICAL        = 10
+    OTOLARYNGOLOGICAL                   = 11
+    OPHTHALMOLOGICAL                    = 12
+    DERMATOLOGICAL                      = 13
 
     # Specialty choices for the model. This list is easy to generate
     # with a good text editor from the above list.
     # An example command to do this with evil Emacs is, in a
     # scratch buffer, :%s/\([A-Z_]*\)\s+=\s+\d+/(\1, '\1'), on the above list.
     SPECIALTY_CHOICES = [
-        (GENERAL_SPECIALTY  , "GENERAL_SPECIALTY"),
-        (ANATOMY            , "ANATOMY"),
-        (PHYSIOLOGY         , "PHYSIOLOGY"),
-        (BIOCHEMISTRY       , "BIOCHEMISTRY"),
-        (GENETICS           , "GENETICS"),
-        (PHARMACOLOGY       , "PHARMACOLOGY"),
-        (PSYCHOLOGY         , "PSYCHOLOGY"),
-        (MICROBIOLOGY       , "MICROBIOLOGY"),
-        (SOCIAL_ISSUES      , "SOCIAL_ISSUES"),
-        (POPULATION_HEALTH  , "POPULATION_HEALTH"),
-        (CLINICAL_SKILLS    , "CLINICAL_SKILLS"),
-        (CARDIOVASCULAR     , "CARDIOVASCULAR"),
-        (RESPIRATORY        , "RESPIRATORY"),
-        (GASTROINTESTINAL   , "GASTROINTESTINAL"),
-        (HEPATOBILIARY      , "HEPATOBILIARY"),
-        (GENITOURINARY      , "GENITOURINARY"),
-        (ENDOCRINE          , "ENDOCRINE"),
-        (NEUROLOGICAL       , "NEUROLOGICAL"),
-        (MUSCULOSKELETAL    , "MUSCULOSKELETAL"),
-        (HAEMATOLOGICAL     , "HAEMATOLOGICAL"),
-        (INFECTIOUS_DISEASE , "INFECTIOUS_DISEASE"),
-        (DERMATOLOGICAL     , "DERMATOLOGICAL"),
-        (PATHOLOGY          , "PATHOLOGY"),
-        (GENERAL_PRACTICE   , "GENERAL_PRACTICE"),
-        (PSYCHIATRY         , "PSYCHIATRY"),
-        (OBGYN              , "OBGYN"),
-        (PAEDIATRICS        , "PAEDIATRICS"),
-        (LAW                , "LAW"),
-        (ETHICS             , "ETHICS"),
+        (PRINCIPLES                          , 'PRINCIPLES'),
+        (CARDIOVASCULAR                      , 'CARDIOVASCULAR'),
+        (RESPIRATORY                         , 'RESPIRATORY'),
+        (GASTROINTESTINAL                    , 'GASTROINTESTINAL'),
+        (RENAL_AND_UROLOGICAL                , 'RENAL_AND_UROLOGICAL'),
+        (MUSCULOSKELETAL_AND_RHEUMATOLOGICAL , 'MUSCULOSKELETAL_AND_RHEUMATOLOGICAL'),
+        (NEUROLOGICAL                        , 'NEUROLOGICAL'),
+        (HAEMATOLOGICAL                      , 'HAEMATOLOGICAL'),
+        (ENDOCRINE                           , 'ENDOCRINE'),
+        (MENTAL_AND_BEHAVIOURAL              , 'MENTAL_AND_BEHAVIOURAL'),
+        (OBSTETRIC_AND_GYNAECOLOGICAL        , 'OBSTETRIC_AND_GYNAECOLOGICAL'),
+        (OTOLARYNGOLOGICAL                   , 'OTOLARYNGOLOGICAL'),
+        (OPHTHALMOLOGICAL                    , 'OPHTHALMOLOGICAL'),
+        (DERMATOLOGICAL                      , 'DERMATOLOGICAL'),
+    ]
+
+    # Topic choices, as subtopics for each specialty.
+    OVERVIEW                          = 0
+    GLOBAL_ISSUES                     = 1
+    DEVELOPMENT                       = 2
+    CELL_LEVEL_STRUCTURE              = 3
+    ORGAN_LEVEL_STRUCTURE             = 4
+    THEORY_OF_NORMAL_FUNCTION         = 5
+    THEORY_OF_ABNORMAL_FUNCTION       = 6
+    MEDICATIONS                       = 7
+    CLINICAL_HISTORY                  = 8
+    CLINICAL_EXAM                     = 9
+    CLINICAL_INVESTIGTIONS            = 10
+    CLINICAL_PROCEDURES               = 11
+    DISORDERS_INFECTIOUS              = 12
+    DISORDERS_NEOPLASTIC              = 13
+    DISORDERS_SPECIFIC                = 14
+    DISORDERS_PAEDIATRIC              = 15
+    DISORDERS_PRIMARY_CARE_PREVENTION = 16
+    DISORDERS_TRAUMA_EXTERNAL         = 17
+    MISCELLANEOUS_TOPICS              = 18
+
+
+    TOPIC_CHOICES = [
+        (OVERVIEW                          , 'OVERVIEW'),
+        (GLOBAL_ISSUES                     , 'GLOBAL_ISSUES'),
+        (DEVELOPMENT                       , 'DEVELOPMENT'),
+        (CELL_LEVEL_STRUCTURE              , 'CELL_LEVEL_STRUCTURE'),
+        (ORGAN_LEVEL_STRUCTURE             , 'ORGAN_LEVEL_STRUCTURE'),
+        (THEORY_OF_NORMAL_FUNCTION         , 'THEORY_OF_NORMAL_FUNCTION'),
+        (THEORY_OF_ABNORMAL_FUNCTION       , 'THEORY_OF_ABNORMAL_FUNCTION'),
+        (MEDICATIONS                       , 'MEDICATIONS'),
+        (CLINICAL_HISTORY                  , 'CLINICAL_HISTORY'),
+        (CLINICAL_EXAM                     , 'CLINICAL_EXAM'),
+        (CLINICAL_INVESTIGTIONS            , 'CLINICAL_INVESTIGTIONS'),
+        (CLINICAL_PROCEDURES               , 'CLINICAL_PROCEDURES'),
+        (DISORDERS_INFECTIOUS              , 'DISORDERS_-_INFECTIOUS'),
+        (DISORDERS_NEOPLASTIC              , 'DISORDERS_-_NEOPLASTIC'),
+        (DISORDERS_SPECIFIC                , 'DISORDERS_-_SPECIFIC'),
+        (DISORDERS_PAEDIATRIC              , 'DISORDERS_-_PAEDIATRIC'),
+        (DISORDERS_PRIMARY_CARE_PREVENTION , 'DISORDERS_-_PRIMARY_CARE_&_PREVENTION'),
+        (DISORDERS_TRAUMA_EXTERNAL         , 'DISORDERS_-_TRAUMA_EXTERNAL'),
+        (MISCELLANEOUS_TOPICS              , 'MISCELLANEOUS_TOPICS'),
     ]
 
 
@@ -122,14 +118,14 @@ class Note(models.Model):
         auto_now=True
     )
 
-    year_level = models.IntegerField(
-        choices=YEAR_LEVEL_CHOICES,
-        default=GENERAL_YEAR_LEVEL
-    )
-
     specialty = models.IntegerField(
         choices=SPECIALTY_CHOICES,
-        default=GENERAL_SPECIALTY
+        default=PRINCIPLES,
+    )
+
+    topic = models.IntegerField(
+        choices=TOPIC_CHOICES,
+        default=OVERVIEW,
     )
 
     title = models.CharField(
@@ -139,6 +135,10 @@ class Note(models.Model):
 
     # The content is expected to be in markdown.
     content = models.TextField()
+
+    class Meta:
+        # Ensure there is only one note per specialty and topic combination.
+        unique_together = ("specialty", "topic")
 
     def __str__(self):
         return self.title

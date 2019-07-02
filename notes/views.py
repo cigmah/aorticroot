@@ -21,8 +21,6 @@ class NoteList(generics.ListAPIView):
 
     serializer_class = NoteListSerializer
 
-    lookup_url_kwarg = 'year_level'
-
     search_fields = (
         "title",
         "content"
@@ -30,25 +28,13 @@ class NoteList(generics.ListAPIView):
 
     filter_fields = (
         "contributor",
-        "year_level",
         "specialty",
+        "topic",
     )
 
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
     )
-
-    def get_queryset(self):
-        # TODO More idiomatic way to filter by year level
-
-        queryset = self.queryset
-
-        maybe_year_level = self.request.GET.get('year_level')
-
-        if maybe_year_level is not None:
-            queryset = self.queryset.filter(year_level=maybe_year_level)
-
-        return queryset
 
     def list(self, request, *args, **kwargs):
 

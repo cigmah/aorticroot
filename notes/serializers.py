@@ -50,8 +50,8 @@ class NoteListSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'title',
-            'year_level',
             'specialty',
+            'topic',
             'modified_at',
             'num_questions',
             'num_comments',

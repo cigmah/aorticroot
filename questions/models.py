@@ -11,7 +11,27 @@ class Question(models.Model):
     This module contains multiple-choice questions which are attached
     to parent notes. Each question MUST have a parent note.
     """
-    
+
+    # Year level constants are specified here for reuse
+    # when this module is imported. It's verbose, but keeps the
+    # hardcoding within this module only.
+    GENERAL_YEAR_LEVEL = 0
+    YEAR_1             = 1
+    YEAR_2A            = 2
+    YEAR_3B            = 3
+    YEAR_4C            = 4
+    YEAR_5D            = 5
+
+    # Year level choices
+    YEAR_LEVEL_CHOICES = [
+        (GENERAL_YEAR_LEVEL , "GENERAL_YEAR_LEVEL"),
+        (YEAR_1             , "YEAR_1"),
+        (YEAR_2A            , "YEAR_2A"),
+        (YEAR_3B            , "YEAR_3B"),
+        (YEAR_4C            , "YEAR_4C"),
+        (YEAR_5D            , "YEAR_5D"),
+    ]
+
     # Domain constants relating to specific subclassification
     # of notes - either foundation knowledge for practice, or
     # relating to specific tasks of clinical practice.
@@ -42,6 +62,11 @@ class Question(models.Model):
         User,
         null=True,
         on_delete=models.SET_NULL
+    )
+
+    year_level = models.IntegerField(
+        choices=YEAR_LEVEL_CHOICES,
+        default=GENERAL_YEAR_LEVEL,
     )
 
     domain = models.IntegerField(
