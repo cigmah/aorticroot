@@ -212,14 +212,14 @@ class QuestionResponseSerializer(serializers.ModelSerializer):
             # Only modify if it was due before today
             if last.next_due_datetime < timezone.now():
 
-                new_interval = last.interval_days * last.ease
-
                 if correct:
                     new_ease = self.calculate_new_ease(last.ease, 5)
+                    next_due_datetime = timezone.now() + timedelta(days=new_interval)
+                    new_interval = last.interval_days * last.ease
                 else:
                     new_ease = self.calculate_new_ease(last.ease, 0)
-
-                next_due_datetime = timezone.now() + timedelta(days=new_interval)
+                    next_due_datetime = timezone.now()
+                    new_interval = last.interval_days * new_ease
 
             else:
                 new_ease = last.ease

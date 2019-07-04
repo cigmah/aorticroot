@@ -1,4 +1,4 @@
-from django.db.models import Count, Q, F
+from django.db.models import Count, Q, F, Max
 from django.utils import timezone
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.exceptions import ObjectDoesNotExist
@@ -73,7 +73,8 @@ class NoteList(generics.ListAPIView):
                     'note_question__question_response__question',
                     filter=(
                         Q(note_question__question_response__next_due_datetime__lte=timezone.now()) &
-                        Q(note_question__question_response__user=user)
+                        Q(note_question__question_response__user=user) &
+                        ~Q(note_question__question_response__next_due_datetime__gt=timezone.now())
                     ),
                     distinct=True,
 
@@ -127,23 +128,27 @@ class NoteRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
         questions = Question.objects.all()
 
         all_ids = questions.filter(note=note).values('id')
-        #all_serialized = QuestionIdSerializer(all_ids, many=True)
 
         if user.is_authenticated:
 
+            past_most_recent_responses = QuestionResponse.objects.filter(
+                question__note=note,
+                user=user,
+            ).values(
+                'question',
+            ).annotate(
+                most_recent=Max('next_due_datetime')
+            )
+
             due_ids = questions.filter(
-                note=note,
+                question_response__next_due_datetime__in=[response.get("most_recent") for response in past_most_recent_responses],
                 question_response__next_due_datetime__lte=timezone.now(),
-                question_response__user=user
             ).values('id').distinct()
-            #due_serialized = QuestionIdSerializer(due_ids, many=True)
 
             known_ids = questions.filter(
-                note=note,
+                question_response__next_due_datetime__in=[response.get("most_recent") for response in past_most_recent_responses],
                 question_response__next_due_datetime__gt=timezone.now(),
-                question_response__user=user
             ).values('id').distinct()
-            #known_serialized = QuestionIdSerializer(known_ids, many=True)
 
             data = {
                 "all_ids": all_ids,
