@@ -204,22 +204,25 @@ class QuestionResponseSerializer(serializers.ModelSerializer):
         correct = validated_data.get("choice").id ==  correct_choice.id
 
         try:
+            print("TRYING")
             last = QuestionResponse.objects.filter(
                 question__id=validated_data.get("question").id,
                 user=user
             ).order_by('-next_due_datetime')[0]
 
             # Only modify if it was due before today
-            if last.next_due_datetime < timezone.now():
+            if last.next_due_datetime <= timezone.now():
 
                 if correct:
+                    print("CORRECT")
                     new_ease = self.calculate_new_ease(last.ease, 5)
-                    next_due_datetime = timezone.now() + timedelta(days=new_interval)
                     new_interval = last.interval_days * last.ease
+                    next_due_datetime = timezone.now() + timedelta(days=new_interval)
                 else:
+                    print("INCORRECT")
                     new_ease = self.calculate_new_ease(last.ease, 0)
-                    next_due_datetime = timezone.now()
                     new_interval = last.interval_days * new_ease
+                    next_due_datetime = timezone.now()
 
             else:
                 new_ease = last.ease
@@ -227,6 +230,7 @@ class QuestionResponseSerializer(serializers.ModelSerializer):
                 next_due_datetime = last.next_due_datetime
 
         except IndexError:
+            print("index error")
             if correct:
                 new_interval = 1
                 new_ease = self.calculate_new_ease(2.5, 5)

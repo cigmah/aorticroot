@@ -68,12 +68,23 @@ class NoteList(generics.ListAPIView):
 
         # TODO more idiomatic or efficient ways to do this.
         if user.is_authenticated:
+
+            past_most_recent_responses = QuestionResponse.objects.filter(
+                user=user,
+            ).values(
+                'question',
+            ).annotate(
+                most_recent=Max('next_due_datetime')
+            )
+
+            list_most_recent = [response.get("most_recent") for response in past_most_recent_responses]
+
             notes = note_objects.annotate(
                 num_due=Count(
-                    'note_question__question_response__question',
+                    'note_question', 
                     filter=(
-                        Q(note_question__question_response__next_due_datetime__lte=timezone.now()) &
                         Q(note_question__question_response__user=user) &
+                        Q(note_question__question_response__next_due_datetime__in=list_most_recent) &
                         ~Q(note_question__question_response__next_due_datetime__gt=timezone.now())
                     ),
                     distinct=True,
@@ -140,13 +151,15 @@ class NoteRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
                 most_recent=Max('next_due_datetime')
             )
 
+            list_most_recent = [response.get("most_recent") for response in past_most_recent_responses]
+
             due_ids = questions.filter(
-                question_response__next_due_datetime__in=[response.get("most_recent") for response in past_most_recent_responses],
+                question_response__next_due_datetime__in=list_most_recent,
                 question_response__next_due_datetime__lte=timezone.now(),
             ).values('id').distinct()
 
             known_ids = questions.filter(
-                question_response__next_due_datetime__in=[response.get("most_recent") for response in past_most_recent_responses],
+                question_response__next_due_datetime__in=list_most_recent,
                 question_response__next_due_datetime__gt=timezone.now(),
             ).values('id').distinct()
 
