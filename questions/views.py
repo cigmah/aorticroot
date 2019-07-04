@@ -76,6 +76,11 @@ class QuestionListCreate(generics.ListCreateAPIView):
             choice_blank = [choice.get("content").strip() == "" for choice in choices]
             assert not any(choice_blank)
 
+            # Assert that choices are unique
+            choices_content = [choice.get("content").strip() for choice in choices]
+            choices_set = set(choices_content)
+            assert len(choices_content) == len(choices_set)
+
         except AssertionError:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
