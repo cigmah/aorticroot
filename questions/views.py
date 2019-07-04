@@ -61,12 +61,23 @@ class QuestionListCreate(generics.ListCreateAPIView):
         # TODO more idiomatic way to do this
         note = Note.objects.get(id=note_id)
 
-        # Assert only one correct choice
-        correct = [choice for choice in choices if choice["is_correct"]]
-        assert len(correct) == 1
+        try:
+            # Assert only one correct choice
+            correct = [choice for choice in choices if choice["is_correct"]]
+            assert len(correct) == 1
 
-        # Assert there is at least one other option
-        assert len(choices) - len(correct) > 0
+            # Assert there is at least one other option
+            assert len(choices) - len(correct) > 0
+
+            # Assert that the stem is not blank
+            assert stem.strip() != ""
+
+            # Assert that choices are not blank
+            choice_blank = [choice.get("content").strip() == "" for choice in choices]
+            assert not any(choice_blank)
+
+        except AssertionError:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
         # Add the question
         question = Question.objects.create(
