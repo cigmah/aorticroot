@@ -163,6 +163,24 @@ class QuestionTest(APITestCase):
 
         return response
 
+    def test_get_question_with_auth(self):
+        """
+        Getting a question while authenticated should pass.
+        """
+
+        response = self.auth_client.get(
+            reverse(
+                "question_retrieve_update_destroy",
+                kwargs={"pk": self.default_question.id},
+            ),
+            format='json',
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+
     def test_post_question_response(self):
         """
         Posting a response to a question should pass.

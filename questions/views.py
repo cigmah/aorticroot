@@ -242,9 +242,9 @@ class QuestionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
             ).count()
 
             data = {
+                **question_serialized.data,
                 'liked': liked,
                 'num_seen': num_seen,
-                **question_serialized.data
             }
 
         else:
