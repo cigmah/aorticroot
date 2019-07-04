@@ -230,11 +230,11 @@ class QuestionResponseSerializer(serializers.ModelSerializer):
             if correct:
                 new_interval = 1
                 new_ease = self.calculate_new_ease(2.5, 5)
+                next_due_datetime = timezone.now() + timedelta(days=new_interval)
             else:
                 new_interval = 0.5
                 new_ease = self.calculate_new_ease(2.5, 0)
-
-            next_due_datetime = timezone.now() + timedelta(days=new_interval)
+                next_due_datetime = timezone.now()
 
         response = QuestionResponse.objects.create(
             user=user,
