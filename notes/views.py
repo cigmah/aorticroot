@@ -70,19 +70,22 @@ class NoteList(generics.ListAPIView):
         if user.is_authenticated:
             notes = note_objects.annotate(
                 num_due=Count(
-                    'note_question__question_response',
+                    'note_question__question_response__question',
                     filter=(
                         Q(note_question__question_response__next_due_datetime__lte=timezone.now()) &
                         Q(note_question__question_response__user=user)
-                    )
+                    ),
+                    distinct=True,
 
                 ),
                 num_known=Count(
-                    'note_question__question_response',
+                    'note_question__question_response__question',
                     filter=(
                         Q(note_question__question_response__next_due_datetime__gt=timezone.now()) &
                         Q(note_question__question_response__user=user)
-                    )
+                    ),
+                    distinct=True,
+
                 ),
             ).order_by('specialty', 'topic')
         else:
