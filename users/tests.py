@@ -5,7 +5,6 @@ from rest_framework import status
 from users.models import *
 import random
 import string
-from django.db import IntegrityError
 
 
 MAX_USERNAME_LENGTH = 150
@@ -90,11 +89,9 @@ class UserTest(APITestCase):
 
         self.make_user_with_email(username, self.random_string(MAX_USERNAME_LENGTH) + "@email.com")
 
-        self.assertRaises(IntegrityError,
-                          self.make_user_with_email,
-                          username=username,
-                          email=self.random_string(MAX_USERNAME_LENGTH) + "@email.com")
+        response = self.make_user_with_email(username, self.random_string(MAX_USERNAME_LENGTH) + "@email.com")
 
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
 
     # POST authenticate
 

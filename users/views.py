@@ -9,6 +9,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework import permissions
 from users.serializers import *
+from django.db import IntegrityError
+
 
 
 class UserCreate(generics.CreateAPIView):
@@ -44,11 +46,17 @@ class UserCreate(generics.CreateAPIView):
 
         password = User.objects.make_random_password()
 
-        user = User.objects.create_user(
-            username,
-            email,
-            password=password
-        )
+        try:
+            user = User.objects.create_user(
+                username,
+                email,
+                password=password
+            )
+        except IntegrityError:
+            return Response(
+                {"invalid" : "username or email"},
+                status = status.HTTP_409_CONFLICT
+            )
 
         token = Token.objects.create(user=user)
 
