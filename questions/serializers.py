@@ -246,42 +246,28 @@ class QuestionResponseSerializer(serializers.ModelSerializer):
 
 class QuestionResponseListSerializer(serializers.ModelSerializer):
 
-    def return_question_data(self):
-        print(QuestionSerializer(question, field=("stem",)))
-        return QuestionSerializer(question, field=("stem",))
 
-    question= return_question_data
+    question_stem= serializers.ReadOnlyField(source='question.stem',)
 
-    choice = QuestionChoiceSerializer()
+    question_year_level = serializers.ReadOnlyField(source='question.year_level',)
 
+    question_domain = serializers.ReadOnlyField(source='question.domain',)
+
+    question_specialty = serializers.ReadOnlyField(source='question.note.specialty')
+
+    was_correct = serializers.ReadOnlyField(source='choice.is_correct')
 
 
     class Meta:
 
         model = QuestionResponse
         fields =  (
-            'question',
-            'choice',
+            'question_stem',
+            'question_year_level',
+            'question_domain',
+            'question_specialty',
+            'was_correct',
             'ease',
             'next_due_datetime',
             'interval_days',
-        )
-
-class QuestionResponseQuestion(serialzers.ModelSerialzer):
-    noteSpecialtyTopic = NoteSpecialtyTopicSerializer()
-    choiceWasCorrect = QuestionChoiceWasCorrectSerializer()
-    class Meta:
-        model = Question
-        fields = (
-            'stem',
-            'year_level',
-            'domain',
-            ''
-        )
-
-class QuestionChoiceWasCorrectSerializer(serializers.ModelSerializer):
-    class Meta:
-        mode = QuestionChoice
-        fields = (
-            'was_correct'
         )

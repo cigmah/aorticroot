@@ -308,7 +308,16 @@ class QuestionResponseList(generics.ListAPIView):
     Returns a paginated list of question responses.
     """
 
+
     queryset = QuestionResponse.objects.all()
 
     serializer_class = QuestionResponseListSerializer
 
+    permission_classes = (
+        permissions.IsAuthenticated,
+    )
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = self.queryset.filter(user=user).order_by('-next_due_datetime')
+        return queryset
