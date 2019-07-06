@@ -88,4 +88,3 @@ class NoteSerializer(serializers.ModelSerializer):
             'contributor',
             'modified_at',
         )
-

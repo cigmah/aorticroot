@@ -87,7 +87,6 @@ class Question(models.Model):
     def __str__(self):
         return self.stem
 
-
 class QuestionChoice(models.Model):
     """
     This module contains the multiple choice options for each
@@ -126,7 +125,6 @@ class QuestionChoice(models.Model):
 
     def __str__(self):
         return self.content
-
 
 class QuestionResponse(models.Model):
     """
@@ -171,7 +169,6 @@ class QuestionResponse(models.Model):
     def __str__(self):
         return f"{self.question}--{self.user}"
 
-
 class QuestionLike(models.Model):
     """
     This model contains likes from users who express positivity
@@ -195,7 +192,6 @@ class QuestionLike(models.Model):
 
     def __str__(self):
         return f"{self.user}--{self.question}"
-
 
 class QuestionFlag(models.Model):
     """
@@ -224,7 +220,6 @@ class QuestionFlag(models.Model):
 
     def __str__(self):
         return f"{self.user}--{self.question}"
-
 
 class QuestionComment(models.Model):
     """

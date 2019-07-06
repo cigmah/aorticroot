@@ -16,6 +16,7 @@ class QuestionTest(APITestCase):
         self.url_like_create = reverse("question_like_create")
         self.url_flag_create = reverse("question_flag_create")
         self.url_comment_create = reverse("question_comment_create")
+        self.url_response_retrieve = reverse("question_response_list")
 
         self.make_auth_client()
 
@@ -264,7 +265,7 @@ class QuestionTest(APITestCase):
             status.HTTP_200_OK
         )
 
-    def test_question_comment_create_valid(self):
+    def test_create_question_comment_valid(self):
         """
         A question comment with valid data should be accepted.
         """
@@ -284,4 +285,18 @@ class QuestionTest(APITestCase):
         self.assertEqual(
             response.status_code,
             status.HTTP_201_CREATED
+        )
+
+    def test_get_question_response_list(self):
+        """
+        The list of question responses for an authenticated user
+        """
+
+        response = self.auth_client.get(
+            self.url_response_retrieve
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
         )
