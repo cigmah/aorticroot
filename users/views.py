@@ -55,7 +55,7 @@ class UserCreate(generics.CreateAPIView):
         except IntegrityError:
             return Response(
                 {"invalid" : "username or email"},
-                status = status.HTTP_409_CONFLICT
+                status=status.HTTP_409_CONFLICT
             )
 
         token = Token.objects.create(user=user)

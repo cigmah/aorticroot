@@ -319,5 +319,5 @@ class QuestionResponseList(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        queryset = self.queryset.filter(user=user).order_by('-next_due_datetime')
+        queryset = self.queryset.filter(user=user).order_by('-created_at')
         return queryset

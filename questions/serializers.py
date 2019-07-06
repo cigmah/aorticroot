@@ -247,6 +247,8 @@ class QuestionResponseSerializer(serializers.ModelSerializer):
 class QuestionResponseListSerializer(serializers.ModelSerializer):
 
 
+    question_stem= serializers.ReadOnlyField(source='question.id',)
+
     question_stem= serializers.ReadOnlyField(source='question.stem',)
 
     question_year_level = serializers.ReadOnlyField(source='question.year_level',)
@@ -254,6 +256,8 @@ class QuestionResponseListSerializer(serializers.ModelSerializer):
     question_domain = serializers.ReadOnlyField(source='question.domain',)
 
     question_specialty = serializers.ReadOnlyField(source='question.note.specialty')
+    
+    question_topic = serializers.ReadOnlyField(source='question.note.topic')
 
     was_correct = serializers.ReadOnlyField(source='choice.is_correct')
 
@@ -262,12 +266,15 @@ class QuestionResponseListSerializer(serializers.ModelSerializer):
 
         model = QuestionResponse
         fields =  (
+            'question_id',
             'question_stem',
             'question_year_level',
             'question_domain',
             'question_specialty',
+            'question_topic',
             'was_correct',
             'ease',
             'next_due_datetime',
+            'created_at',
             'interval_days',
         )
