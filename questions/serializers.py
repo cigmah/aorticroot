@@ -71,7 +71,6 @@ class QuestionLikeSerializer(serializers.ModelSerializer):
 
         return like
 
-
 class QuestionFlagSerializer(serializers.ModelSerializer):
 
     user = UserSerializer(
@@ -93,7 +92,6 @@ class QuestionFlagSerializer(serializers.ModelSerializer):
         )
 
         return flag
-
 
 class QuestionSerializer(serializers.ModelSerializer):
 
@@ -204,7 +202,6 @@ class QuestionResponseSerializer(serializers.ModelSerializer):
         correct = validated_data.get("choice").id ==  correct_choice.id
 
         try:
-            print("TRYING")
             last = QuestionResponse.objects.filter(
                 question__id=validated_data.get("question").id,
                 user=user
@@ -214,12 +211,10 @@ class QuestionResponseSerializer(serializers.ModelSerializer):
             if last.next_due_datetime <= timezone.now():
 
                 if correct:
-                    print("CORRECT")
                     new_ease = self.calculate_new_ease(last.ease, 5)
                     new_interval = last.interval_days * last.ease
                     next_due_datetime = timezone.now() + timedelta(days=new_interval)
                 else:
-                    print("INCORRECT")
                     new_ease = self.calculate_new_ease(last.ease, 0)
                     new_interval = last.interval_days * new_ease
                     next_due_datetime = timezone.now()
@@ -230,7 +225,6 @@ class QuestionResponseSerializer(serializers.ModelSerializer):
                 next_due_datetime = last.next_due_datetime
 
         except IndexError:
-            print("index error")
             if correct:
                 new_interval = 1
                 new_ease = self.calculate_new_ease(2.5, 5)
@@ -249,3 +243,45 @@ class QuestionResponseSerializer(serializers.ModelSerializer):
         )
 
         return response
+
+class QuestionResponseListSerializer(serializers.ModelSerializer):
+
+    def return_question_data(self):
+        print(QuestionSerializer(question, field=("stem",)))
+        return QuestionSerializer(question, field=("stem",))
+
+    question= return_question_data
+
+    choice = QuestionChoiceSerializer()
+
+
+
+    class Meta:
+
+        model = QuestionResponse
+        fields =  (
+            'question',
+            'choice',
+            'ease',
+            'next_due_datetime',
+            'interval_days',
+        )
+
+class QuestionResponseQuestion(serialzers.ModelSerialzer):
+    noteSpecialtyTopic = NoteSpecialtyTopicSerializer()
+    choiceWasCorrect = QuestionChoiceWasCorrectSerializer()
+    class Meta:
+        model = Question
+        fields = (
+            'stem',
+            'year_level',
+            'domain',
+            ''
+        )
+
+class QuestionChoiceWasCorrectSerializer(serializers.ModelSerializer):
+    class Meta:
+        mode = QuestionChoice
+        fields = (
+            'was_correct'
+        )

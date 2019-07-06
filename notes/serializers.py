@@ -89,3 +89,10 @@ class NoteSerializer(serializers.ModelSerializer):
             'modified_at',
         )
 
+class NoteSpecialtyTopicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Note
+        fields = (
+            'specialty',
+            'topic'
+        )

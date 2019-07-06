@@ -41,5 +41,10 @@ urlpatterns = [
         "comments/",
         QuestionCommentCreate.as_view(),
         name="question_comment_create",
+    ),
+    path(
+        "response_list/",
+        QuestionResponseList.as_view(),
+        name="question_response_list",
     )
 ]

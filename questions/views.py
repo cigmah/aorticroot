@@ -302,3 +302,13 @@ class QuestionCommentCreate(generics.CreateAPIView):
     permission_classes = (
         permissions.IsAuthenticated,
     )
+
+class QuestionResponseList(generics.ListAPIView):
+    """
+    Returns a paginated list of question responses.
+    """
+
+    queryset = QuestionResponse.objects.all()
+
+    serializer_class = QuestionResponseListSerializer
+
