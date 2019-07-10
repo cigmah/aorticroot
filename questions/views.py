@@ -53,6 +53,8 @@ class QuestionListCreate(generics.ListCreateAPIView):
         domain = request.data.get("domain")
         stem = request.data.get("stem")
         choices = request.data.get("choices")
+        year_level = request.data.get("year_level")
+        domain = request.data.get("domain")
 
         if None in [note_id, domain, stem, choices]:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -88,7 +90,9 @@ class QuestionListCreate(generics.ListCreateAPIView):
         question = Question.objects.create(
             contributor=contributor,
             note=note,
-            stem=stem
+            stem=stem,
+            year_level=year_level,
+            domain=domain,
         )
 
         # TODO Find a way to do this in bulk.
