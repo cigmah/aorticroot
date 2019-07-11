@@ -4,6 +4,8 @@ Backend API for AORTA.
 
 # Setup
 
+We are hosting a server on Heroku. For developers, you'll want to set up a local development server. 
+
 ## Local Development Server
 
 First ensure you have Python 3 installed (we have tested with Python 3.6.8).
@@ -61,34 +63,41 @@ If all tests pass, you should be good to go. Start the development server with:
 python manage.py runserver
 ```
 
-# Roadmap
+# Features and Roadmap
 
-- Tags
-  - [ ] Implement and test filtering questions by arbitrary tags
-  - [ ] Enforce lowercase for easy matching?
-- Choices
-  - [ ] Implement and test filtering questions by answer
-  - [ ] Enforce lowercase for easy matching?
-  - [ ] Add metadata to choices e.g. short descriptions?
-  - [ ] Random generation of distractors within category, or expose endpoint to
-        get random choices per category
-- Questions
-  - [ ] Return choice statistics with question (annotate with sum over
-        QuestionResponse table)
-  - [ ] Implement simple spaced repetition algorithm for authenticated users
-        (select from QuestionResponse where user = request.user and question_id
-        = request.data.question_id, then fold left a two input algorithm?
-        alternatively, save ease factor and interval with each new response)
-  - [ ] Expose an endpoint for random questions (completely random if guest, or
-        random with spaced repetition if authenticated)
-- Cases
-  - [ ] Add case table (need to spec first to determine what the frontend will need)
-- Users
-  - [ ] Friendlier random passwords (correct horse battery staple?)
-  - [ ] Specify token expiry
-  - [ ] Protect against spammed user account generation? Would prefer not
-        storing *any* data about users (hence the no-email,
-        we-give-you-a-password-and-you-cant-set-it-yourself auth system). 
-- Documenation
-  - [ ] Proper Swagger API
-  - [ ] Comments in code.
+## Notes
+
+- [X] Endpoint to get list of all notes, +/- spaced repetition information based on authentication
+- [X] Search filter for list of notes
+  - [ ] Extend search filter to note comments and/or questions
+- [X] Endpoint to get individual note, +/- spaced repetition information based on authentication
+- [X] Endpoint to add a note comment/contribution
+- [X] Endpoint to add EMQs to notes (requires authentication)
+- [ ] Endpoint to delete a note comment
+- [ ] Endpoint to edit a note comment
+
+## Questions
+
+- [X] Endpoint to get an EMQ by ID
+- [X] Endpoint to get a random list of question IDs with filters
+- [X] Annotate EMQ choices with number of users choosing each option
+- [X] Endpoint to submit a question response (requires auth)
+- [X] Endpoint to like a question (requires auth) 
+- [X] Endpoint to flag a question (requires auth)
+- [X] Endpoint to comment on a question (requires auth)
+- [ ] Endpoint to modify or delete a comment on a question
+- [ ] Filter out questions with 3 or more flags
+- [X] Get list of questions responses for a corresponding user
+- [ ] Endpoint to calculate average accuracy for each specialty, and for each topic
+- [ ] Endpoint to get list of submitted questions with likes number
+- [ ] Endpoint to get accuracy Z-score
+
+## Users
+
+- [X] Endpoint to register
+- [X] Endpoint to login
+- [ ] Endpoint to delete account
+
+## Cases
+
+Still to be planned.
