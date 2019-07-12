@@ -54,9 +54,8 @@ class QuestionListCreate(generics.ListCreateAPIView):
         stem = request.data.get("stem")
         choices = request.data.get("choices")
         year_level = request.data.get("year_level")
-        domain = request.data.get("domain")
 
-        if None in [note_id, domain, stem, choices]:
+        if None in [note_id, domain, stem, choices, year_level]:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         # Get the note out of the request
