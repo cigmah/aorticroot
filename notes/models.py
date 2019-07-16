@@ -161,7 +161,7 @@ class NoteComment(models.Model):
     author = models.ForeignKey(
         User,
         null=True,
-        on_delete=models.SET_NULL
+        on_delete=models.CASCADE,
     )
 
     created_at = models.DateTimeField(

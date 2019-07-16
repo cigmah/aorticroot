@@ -178,7 +178,7 @@ class QuestionLike(models.Model):
     user = models.ForeignKey(
         User,
         null=True,
-        on_delete=models.SET_NULL
+        on_delete=models.CASCADE,
     )
 
     question = models.ForeignKey(
@@ -207,7 +207,7 @@ class QuestionFlag(models.Model):
     user = models.ForeignKey(
         User,
         null=True,
-        on_delete=models.SET_NULL
+        on_delete=models.CASCADE,
     )
 
     question = models.ForeignKey(
@@ -235,7 +235,7 @@ class QuestionComment(models.Model):
     author = models.ForeignKey(
         User,
         null=True,
-        on_delete=models.SET_NULL
+        on_delete=models.CASCADE,
     )
 
     created_at = models.DateTimeField(
