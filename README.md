@@ -88,7 +88,7 @@ python manage.py runserver
 - [ ] Endpoint to modify or delete a comment on a question
 - [ ] Filter out questions with 3 or more flags
 - [X] Get list of questions responses for a corresponding user
-- [ ] Endpoint to calculate average accuracy for each specialty, and for each topic
+- [X] Endpoint to calculate average accuracy for each specialty, and for each topic
 - [ ] Endpoint to get list of submitted questions with likes number
 - [ ] Endpoint to get accuracy Z-score
 

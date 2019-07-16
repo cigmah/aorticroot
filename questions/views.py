@@ -1,4 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Count, Q
 from random import choice, sample
 from rest_framework import generics
 from rest_framework import status
@@ -6,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework import permissions
 from questions.models import *
 from questions.serializers import *
+from notes.models import Note
 
 
 class QuestionListCreate(generics.ListCreateAPIView):
@@ -324,3 +326,40 @@ class QuestionResponseList(generics.ListAPIView):
         user = self.request.user
         queryset = self.queryset.filter(user=user).order_by('-created_at')
         return queryset
+
+class QuestionAccuracyRetrieve(generics.RetrieveAPIView):
+    """
+    Returns question accuracy by specialty and by topic.
+    """
+
+    permission_classes = (
+        permissions.IsAuthenticated,
+    )
+
+    def retrieve(self, request, *args, **kwargs):
+
+        group = self.request.GET.get('group')
+
+        if group == 'specialty':
+            values = Note.objects.values('specialty')
+        elif group == 'topic':
+            values = Note.objects.values('topic')
+        else:
+            Response(status=status.HTTP_400_BAD_REQUEST)
+
+        user = request.user
+
+        accuracy = values.annotate(
+                          correct=Count(
+                              'note_question__question_response',
+                              filter=Q(note_question__question_response__user=user) &
+                              Q(note_question__question_response__choice__is_correct=True)
+                          ),
+                          incorrect=Count(
+                              'note_question__question_response',
+                              filter=Q(note_question__question_response__user=user) &
+                              Q(note_question__question_response__choice__is_correct=False)
+                          )
+                      )
+
+        return Response(accuracy)

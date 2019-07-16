@@ -17,6 +17,7 @@ class QuestionTest(APITestCase):
         self.url_flag_create = reverse("question_flag_create")
         self.url_comment_create = reverse("question_comment_create")
         self.url_response_retrieve = reverse("question_response_list")
+        self.url_accuracy = reverse("question_accuracy")
 
         self.make_auth_client()
 
@@ -299,4 +300,37 @@ class QuestionTest(APITestCase):
         self.assertEqual(
             response.status_code,
             status.HTTP_200_OK
+        )
+
+    def test_get_accuracy_specialty(self):
+        """
+        Returns accuracy by specialty.
+        """
+
+        response = self.auth_client.get(
+            self.url_accuracy,
+            {"group": "specialty"},
+            format="json"
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+
+    def test_get_accuracy_topic(self):
+        """
+        Returns accuracy by topic.
+        """
+
+        response = self.auth_client.get(
+            self.url_accuracy,
+            {"group": "topic"},
+            format="json"
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
         )

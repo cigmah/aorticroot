@@ -28,6 +28,11 @@ urlpatterns = [
         name="question_response_create",
     ),
     path(
+        "accuracy/",
+        QuestionAccuracyRetrieve.as_view(),
+        name="question_accuracy",
+    ),
+    path(
         "likes/",
         QuestionLikeCreate.as_view(),
         name="question_like_create",
