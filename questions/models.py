@@ -99,8 +99,7 @@ class QuestionChoice(models.Model):
         on_delete=models.CASCADE,
     )
 
-    content = models.CharField(
-        max_length=80
+    content = models.TextField(
     )
 
     explanation = models.TextField(
