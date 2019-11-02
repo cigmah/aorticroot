@@ -1,8 +1,7 @@
-> Contributed by **moderator**. 
-> 
-> Contact via the AORTA info page. 
-> 
-> Last updated 2019/08/20.
+> Contributed by **moderator**. Please contact us via the AORTA Info page if you
+> have any questions.
+
+# EPIDEMIOLOGY
 
 ## What is epidemiology?
 
@@ -14,7 +13,11 @@ important to understand how non-biomedical factors contribute to health; these
 factors may go unintentionally neglected, and often exert a strong effect on our
 state of wellbeing.
 
-## What is health?
+# HEALTH IN SOCIETY
+
+## "HEALTH"
+
+### What is health?
 
 The [constitution of the
 WHO](http://apps.who.int/gb/bd/PDF/bd47/EN/constitution-en.pdf?ua=1) states that:
@@ -36,9 +39,9 @@ In response, Huber et al. propose an alternative definition of health as:
 > The ability to adapt and self-manage in the face of social, physical and
 > emotional challenges. 
 
-## Is health a human right?
+### Is health a human right?
 
-Emphatically yes. The second statement of the [constitution of the
+Yes. The second statement of the [constitution of the
 WHO](http://apps.who.int/gb/bd/PDF/bd47/EN/constitution-en.pdf?ua=1), right
 after the definition of health, states that:
 
@@ -46,7 +49,7 @@ after the definition of health, states that:
 > the fundamental rights of every human being without distinction of
 > race, religion, political belief, economic or social condition.
 
-## What is needed for health?
+### What is necessary for health?
 
 The [Ottawa Charter for Health
 Promotion](https://www.who.int/healthpromotion/conferences/previous/ottawa/en/),

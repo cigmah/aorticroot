@@ -1,47 +1,52 @@
-> Contributed by **moderator**
-> 
-> Contact via the AORTA info page. 
-> 
-> Last updated 2019/08/23.
+> Contributed by **moderator**. Please contact us via the AORTA Info page if you
+> have any questions.
 
 # Gross Anatomy
 
-*Gross anatomy* is the study of anatomy at the level of organs, rather than
-individual cells. 
+### In what order do I study anatomy?
 
-Your teaching in gross anatomy will typically start with the upper and lower
-limbs, for which you can order your thinking by the various components of the
-limbs - the bones, the muscles, the joints, the vessels and the nerves (and the
-connective tissue holding it all together).
+You can study anatomy through a number of approaches which highlight different
+anatomical patterns:
 
-You'll then start to learn about the organs and their individual anatomy. A
-similar process of thinking about bones (if relevant), muscle, joints, vessels
-and nerves will be helpful. 
+- **Regional approaches**, where you study anatomy by different anatomical
+  locations around the body (e.g. the head, the neck, the thorax, the abdomen,
+  the upper limb).
+- **Systemic approaches**, where you study anatomy by the different body systems
+  (e.g. the nervous system, the cardiovascular system, the lymphatic system).
 
-# Anatomical Terminology
+## Anatomical Terminology
 
-## Axes 
+### How do I describe the positions of structures relative to one another?
 
-There are three primary axes we refer to when talking about the relation of
-structures relative to each other in the human body. These axes are always
-defined relative to a human standing in a neutral position with their palms
-facing in the same direction as their face (in front of them).
+For consistency, relations of anatomical structures are usually made with
+reference to humans positioned in a *standard anatomical position*.
 
+- **(Standard) anatomical position (of reference)** is a standard positioning of
+  the body from which anatomical relations are described. For humans, this
+  usually corresponds to standing straight with the palms facing outward.
+
+You can talk about axes and terms describing relations along those axes.
+
+- **Axes** are lines of reference to talk about positions of structures relative
+  to one another. There are examples of these lines below, but any line parallel
+  to these lines is also considered as that axis. 
+  - The **longitudinal axis** is a line from your head to your feet.
+      - Your head is **superior/cranial** (above) to our feet. 
+      - Your feet are **inferior/caudal** (below) to your head.
+  - The **sagittal axis** is a line from the front of your chest to the back of
+    your back (think sagittal = sagittarius = an arrow through your chest).
+      - Your toes are **anterior** (in front of) your heel.
+      - Your heel is **posterior** (behind) your toes.
+      - Your palm is **ventral** (more palm-facing, like anterior) to the back of your hand.
+      - The back of your hand is **dorsal** (more back-facing, like posterior)
+        to your palm.
+  - The **horizontal axis** is a line from your left ear to your right ear.
+      - Your ears are **lateral** (further out from the midline) to your nose.
+      - Your nose is **medial** (closer to the midline) to your ears.
+     
 ![Axes](https://upload.wikimedia.org/wikipedia/commons/8/8d/Anatomical_axes.svg)
 
 > Edoarado and Mikael Häggström ["Anatomical > axes"](https://commons.wikimedia.org/wiki/File:Anatomical_axes.svg), CC BY-SA 3.0
-
-- *Superior* and *inferior* refer to positions along the *longitudinal* axis.
-  The brain is *superior* to the heart (above), and the heart is *inferior* to
-  the brain (below). 
-- *Anterior*/*ventral*/*plantar* and *posterior*/*dorsal* refer to positions along the
-  *sagittal* axis. The toes are *anterior* (in front of) to the ankle, and the
-  ankle is *posterior* (behind) the toes. *Ventral* and *dorsal* are often used
-  when talking about the palms (*ventra*) vs the back of the hand (*dorsal*), or
-  the sole of the foot (*ventral*/*plantar*) vs the top of the foot (*dorsal*).
-- *Medial* and *lateral* refer to positions along the *horizontal* axis. The
-  nose is *medial* (closer to the midline) to the ears, and the ears are
-  *lateral* (further from the midline) to the nose. 
 
 ## Planes
 

@@ -1,40 +1,38 @@
 > Contributed by **moderator**
 > 
 > Contact via the AORTA info page. 
-> 
-> Last updated 2019/08/23.
 
 # Physiology
 
 *Physiology* is the study of the human body functions (usually in the "normal"
 state, rather than when disease makes things go wrong).
 
-# Homeostasis
+# Cellular Physiology
 
-The human body is churning away every day. It maintains itself. It's able to do
-so because all of the processes in the human body maintain a very fine balance
-that's self-regulating and self-tuning like a thermostat. This is the principle
-of *homeostasis*, or how the body is able to keep itself in a physical and
-chemical balance. 
+Here are some key definitions:
 
-There are lots of different components in the human body, and each needs to be
-kept in a fine balance through homeostatic mechanisms so you can live every day
-in a similar fashion. 
+- **Passive transport** describes a natural movement of molecules across
+  membranes. *No additional energy* is required; molecules move naturally in
+  whatever direction increases entropy (e.g. from high concentration to low
+  concentration, to equalise a concentration gradient). 
+     - There are *four types of passive transport*:
+       1. **(Simple) diffusion**
+       2. **Facilitated diffusion**
+       3. **Filtration**
+       4. **Osmosis**
+- **Active transport** describes a purposeful movement of molecules across
+  membranes. *Energy is required* because molecules are often moving in ways
+  which decrease entropy (e.g. from low concentration to high concentration, to
+  accumulate a molecule). 
 
-## Feedback
+## Cellular Components
 
-Balance is achieved by simultaneously having *control* over variables in the
-body (e.g. temperature), and by being able to *sense* those variables. 
+Here are some of the functional features of the components of cells:
 
-By continually maintaining a *loop* of controlling something, sensing the
-effect, adjusting control, sensing the effect etc, the body is able to maintain
-*feedback loops*  which help it to readjust its control. 
-
-The effect of feedback is often divided into two types:
-
-1. *Positive feedback*, which is when an increase in a variable causes the
-   controller to change to continue to increase the variable. During ovulation,
-   for example, rising levels of oestrogen trigger a positive feedback loop with
-   lutenising hormone (LH), which continues to increase both hormones until the
-   egg is released.
-2. *Negative feedback*, 
+- The **plasma membrane** is the outer protective lining of cells.
+  - Passively, it is:
+   - **Impermeable** to large molecules (so proteins and genetic material usually stay inside).
+   - **Selectively permeable** to small molecules (so some ions can cross)
+  - But cells are complex, and having molecules pass through passively down
+    concentration gradients is not enough for most cells (e.g. cells need to
+    import/export proteins or build up ions). 
