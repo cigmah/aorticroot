@@ -16,16 +16,31 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework.documentation import include_docs_urls
+from django.views.generic import TemplateView
+from rest_framework.schemas import get_schema_view
 from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("mail/", include("mail.urls")),
-    path("notes/", include("notes.urls")),
+    path("objectives/", include("objectives.urls")),
     path("questions/", include("questions.urls")),
     path("users/", include("users.urls")),
-    path("docs/", include_docs_urls(title="AORTA API")),
+
+    # Path for Open API schema
+    path('openapi/', get_schema_view(
+        title="Aortic Root API",
+        description="API for AORTA.",
+        version="0.2"
+    ), name='openapi-schema'),
+
+    # Path for Redoc schema view
+    path(
+        "redoc/",
+        TemplateView.as_view(
+            template_name="redoc.html", extra_context={"schema_url": "openapi-schema"}
+        ),
+    ),
+
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

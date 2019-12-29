@@ -1,3 +1,6 @@
-from django.db import models
+""" User models. 
 
-# Create your models here.
+We are currently using the default Django user model, so no models are
+included here.
+
+"""

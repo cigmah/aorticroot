@@ -8,7 +8,7 @@ We are hosting a server on Heroku. For developers, you'll want to set up a local
 
 ## Local Development Server
 
-First ensure you have Python 3 installed (we have tested with Python 3.6.8).
+First ensure you have Python 3 installed (we have tested with Python 3.7.5).
 
 To set up this backend locally, clone this repository.
 
@@ -63,40 +63,11 @@ If all tests pass, you should be good to go. Start the development server with:
 python manage.py runserver
 ```
 
-# Features and Roadmap
+Note that you may encounter a `500 Internal Server` error when Debug = False, in which case try running:
 
-## Notes
-
-- [X] Endpoint to get list of all notes, +/- spaced repetition information based on authentication
-- [X] Search filter for list of notes
-  - [ ] Extend search filter to note comments and/or questions
-- [X] Endpoint to get individual note, +/- spaced repetition information based on authentication
-- [X] Endpoint to add a note comment/contribution
-- [X] Endpoint to add EMQs to notes (requires authentication)
-- [ ] Endpoint to delete a note comment
-- [ ] Endpoint to edit a note comment
-
-## Questions
-
-- [X] Endpoint to get an EMQ by ID
-- [X] Endpoint to get a random list of question IDs with filters
-- [X] Annotate EMQ choices with number of users choosing each option
-- [X] Endpoint to submit a question response (requires auth)
-- [X] Endpoint to like a question (requires auth) 
-- [X] Endpoint to flag a question (requires auth)
-- [X] Endpoint to comment on a question (requires auth)
-- [ ] Endpoint to modify or delete a comment on a question
-- [ ] Filter out questions with 3 or more flags
-- [X] Get list of questions responses for a corresponding user
-- [X] Endpoint to calculate average accuracy for each specialty, and for each topic
-- [ ] Endpoint to get list of submitted questions with likes number
-- [ ] Endpoint to get accuracy Z-score
-
-## Users
-
-- [X] Endpoint to register
-- [X] Endpoint to login
-- [ ] Endpoint to delete account
+``` sh
+python manage.py collectstatic
+```
 
 ## Cases
 

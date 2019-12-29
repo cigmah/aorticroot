@@ -1,247 +1,172 @@
+""" Models relating to multiple choice questions.
+"""
 from django.db import models
 from django.contrib.auth.models import User
-from django.utils import timezone
-from notes.models import Note
-from datetime import timedelta
-
+from objectives.models import Objective
 
 
 class Question(models.Model):
+    """ A Question contains a basic multiple-choice question.
+
+    Each Question must be attached to a parent Objective. The multiple-choice options
+    for each question are stored in a separate table, QuestionChoice, so that questions
+    can have a flexible number of options. 
     """
-    This module contains multiple-choice questions which are attached
-    to parent notes. Each question MUST have a parent note.
-    """
 
-    # Year level constants are specified here for reuse
-    # when this module is imported. It's verbose, but keeps the
-    # hardcoding within this module only.
-    GENERAL_YEAR_LEVEL = 0
-    YEAR_1             = 1
-    YEAR_2A            = 2
-    YEAR_3B            = 3
-    YEAR_4C            = 4
-    YEAR_5D            = 5
-
-    # Year level choices
-    YEAR_LEVEL_CHOICES = [
-        (GENERAL_YEAR_LEVEL , "GENERAL_YEAR_LEVEL"),
-        (YEAR_1             , "YEAR_1"),
-        (YEAR_2A            , "YEAR_2A"),
-        (YEAR_3B            , "YEAR_3B"),
-        (YEAR_4C            , "YEAR_4C"),
-        (YEAR_5D            , "YEAR_5D"),
-    ]
-
-    # Domain constants relating to specific subclassification
-    # of notes - either foundation knowledge for practice, or
-    # relating to specific tasks of clinical practice.
-    GENERAL_DOMAIN = 0
-    FOUNDATION     = 1
-    ASSESSMENT     = 2
-    INVESTIGATION  = 3
-    DIAGNOSIS      = 4
-    MANAGEMENT     = 5
-
-    # Domain choices.
-    DOMAIN_CHOICES = [
-        (GENERAL_DOMAIN , "GENERAL_DOMAIN"),
-        (FOUNDATION     , "FOUNDATION"),
-        (ASSESSMENT     , "ASSESSMENT"),
-        (INVESTIGATION  , "INVESTIGATION"),
-        (DIAGNOSIS      , "DIAGNOSIS"),
-        (MANAGEMENT     , "MANAGEMENT"),
-    ]
-
-    note = models.ForeignKey(
-        Note,
-        on_delete=models.PROTECT,
-        related_name='note_question',
+    objective = models.ForeignKey(
+        Objective, 
+        on_delete=models.PROTECT, 
+        related_name="objective_question",
+        help_text="The parent learning objective for this question."
     )
-
     contributor = models.ForeignKey(
         User,
-        null=True,
-        on_delete=models.SET_NULL
+        on_delete=models.PROTECT,
+        related_name="user_question",
+        help_text="The user who contributed this question."
     )
-
-    year_level = models.IntegerField(
-        choices=YEAR_LEVEL_CHOICES,
-        default=GENERAL_YEAR_LEVEL,
-    )
-
-    domain = models.IntegerField(
-        choices=DOMAIN_CHOICES,
-        default=GENERAL_DOMAIN
-    )
-
     created_at = models.DateTimeField(
-        auto_now_add=True
+        auto_now_add=True,
+        help_text="Time of creation."
     )
-
     modified_at = models.DateTimeField(
-        auto_now=True
+        auto_now=True,
+        help_text="Time of modification."
     )
-
-    stem = models.TextField()
+    stem = models.TextField(
+        help_text="The basic question stem."
+    )
 
     def __str__(self):
         return self.stem
 
+
 class QuestionChoice(models.Model):
-    """
-    This module contains the multiple choice options for each
-    question, as a one-to-many relation.
+    """ QuestionChoice contain the choices for each question.
+
+    This is modelled as a one-to-many relation, with the parent
+    question identified through a foreign key.
+
+    Each question should only have one correct choice (i.e. there
+    should only be one choice with `is_correct=True` for each question.
+    It doesn't seem this can be enforced at the model layer, so this
+    should be enforced through the application logic.
     """
 
     question = models.ForeignKey(
-        Question,
+        Question, 
         related_name="question_choice",
         on_delete=models.CASCADE,
+        help_text="The parent question to which this choice belongs."
     )
-
     content = models.TextField(
+        help_text="The text displayed for this choice under a question."
     )
-
     explanation = models.TextField(
-        null=True
+        help_text="The explanation for why this chocie is right or wrong."
     )
-
-    # Enforcing that there is exactly one is_correct=True
-    # row per QuestionChoice will have to be done on the
-    # application layer. Initially, the answer and explanation
-    # were put into the Question table to guarantee one and only
-    # one correct answer, but this complicated the application
-    # logic somewhat, and it was deemed easier to enforce this
-    # both on the frontend and during the serialization of
-    # received POST data rather than on the database model
-    # level.
-    # Question choices should only ever be created as a batch.
-    is_correct = models.BooleanField()
+    is_correct = models.BooleanField(
+        help_text="Whether this is the correct choice, or an incorrect choice."
+    )
 
     class Meta:
-        # Ensure each choice for a question is different
+        # Each choice for a question must be different
         unique_together = ("question", "content")
 
     def __str__(self):
         return self.content
 
-class QuestionResponse(models.Model):
-    """
-    This model contains responses that users give when they
-    answer questions.
 
+class QuestionResponse(models.Model):
+    """ QuestionResponse contains a user's choice response to a question.
+
+    Every time a user attempts a question, their choice will be saved as a 
+    QuestionResponse object. 
+
+    The choices will save anonymous responses as well, so the user field is optional.
+
+    The question need not be saved in this model, as every choice is attached to the
+    parent question anyway. 
     """
 
     user = models.ForeignKey(
         User,
-        on_delete=models.CASCADE
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="user_response",
+        help_text="Optional user who sent the response. If null, assume to be anonymous."
     )
-
-    question = models.ForeignKey(
-        Question,
-        on_delete=models.CASCADE,
-        related_name='question_response',
-    )
-
     choice = models.ForeignKey(
         QuestionChoice,
         on_delete=models.CASCADE,
-        related_name='choice_response',
+        related_name="choice_response",
+        help_text="The choice which was selected for this response."
     )
-
     created_at = models.DateTimeField(
-        auto_now_add=True
-    )
-
-    ease = models.FloatField(
-        default=2.5
-    )
-
-    interval_days = models.FloatField(
-        default=1
-    )
-
-    next_due_datetime = models.DateTimeField(
-        default=timezone.now() + timedelta(days=1)
+        auto_now_add=True,
+        help_text="The time the response was submitted."
     )
 
     def __str__(self):
-        return f"{self.question}--{self.user}"
+        return f"{self.user} chose '{self.choice}' @ {self.created_at}"
 
-class QuestionLike(models.Model):
-    """
-    This model contains likes from users who express positivity
-    about a question.
+
+class QuestionRating(models.Model):
+    """ QuestionRating contain ratings from users for a question.
+
+    Anyone can rate questions a rating out of 5 stars. They do not need to be 
+    authenticated. If they are authenticated, they can only rate the question
+    once. 
     """
 
     user = models.ForeignKey(
         User,
         null=True,
-        on_delete=models.CASCADE,
+        blank=True,
+        on_delete=models.SET_NULL,
+        help_text="The user who rated the question."
     )
-
     question = models.ForeignKey(
         Question,
         on_delete=models.CASCADE,
-        related_name="question_like"
+        related_name="question_rating",
+        help_text="The question that was rated"
     )
-
-    class Meta:
-        unique_together = ("user", "question")
+    rating = models.IntegerField(
+        help_text="An integer rating in the range 1-5 inclusive."
+    )
 
     def __str__(self):
-        return f"{self.user}--{self.question}"
+        return f"{self.user} rated Question #{self.question.id} {self.rating}/5 stars."
 
-class QuestionFlag(models.Model):
-    """
-    This model contains flgs from users who express negativity
-    about a question.
-
-    Generally, this should not be exposed via an API; instead,
-    the aggregate should be counted and tallied for responses.
-
-    Alternatively, flagged questions can simply not be shown.
-    """
-
-    user = models.ForeignKey(
-        User,
-        null=True,
-        on_delete=models.CASCADE,
-    )
-
-    question = models.ForeignKey(
-        Question,
-        on_delete=models.CASCADE
-    )
-
-    class Meta:
-        unique_together = ("user", "question")
-
-    def __str__(self):
-        return f"{self.user}--{self.question}"
 
 class QuestionComment(models.Model):
-    """
-    This model contains comments that users can add to questions.
+    """ QuestionComment contains comments that users can add to questions.
+
+    Comments can be posted anonymously.
     """
 
     question = models.ForeignKey(
-        Question,
-        on_delete=models.CASCADE,
-        related_name='question_comment'
+        Question, 
+        on_delete=models.CASCADE, 
+        related_name="question_comment",
+        help_text="The question that was commented on."
     )
-
-    author = models.ForeignKey(
+    contributor = models.ForeignKey(
         User,
         null=True,
+        blank=True,
         on_delete=models.CASCADE,
+        help_text="The optional user who authored the comment. If null, it is anonymous."
     )
-
     created_at = models.DateTimeField(
-        auto_now_add=True
+        auto_now_add=True,
+        help_text="The time the comment was posted."
     )
-
-    content = models.TextField()
+    content = models.TextField(
+        help_text="The comment iself, stored as Markdown."
+    )
 
     def __str__(self):
         return self.content

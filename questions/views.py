@@ -1,76 +1,100 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Q
-from random import choice, sample
+from random import sample
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework import permissions
-from questions.models import *
-from questions.serializers import *
-from notes.models import Note
+from questions.models import (
+    Question,
+    QuestionChoice,
+    QuestionResponse,
+    QuestionRating,
+    QuestionComment,
+)
+from questions.serializers import (
+    QuestionBasicSerializer,
+    QuestionDetailSerializer,
+    QuestionIdSerializer,
+    QuestionResponseCreateSerializer,
+    QuestionRatingSerializer,
+    QuestionCommentSerializer,
+    QuestionResponseListSerializer,
+)
+from questions.permissions import IsContributorOrReadOnly, IsParentContributorOrReadOnly
+from objectives.models import Objective
 
 
-class QuestionListCreate(generics.ListCreateAPIView):
+class QuestionCreate(generics.CreateAPIView):
+    """ Create a new question.
+
+
+    # POST
+
+    Creates a new question. Creating a new question requires authentication.
+
+    Example body:
+
+        { "objective_id": 3
+        , "stem": "string"
+        , "choices": 
+            [ { "content": "string"
+              , "is_correct": true
+              , "explanation": "string" }
+            , { "content": "string2"
+              , "is_correct": false
+              , "explanation": "string" } ] }
+
+    ## Responses
+    
+    ### 201
+    The question was successfully created
+
     """
-    List all questions, or create a new question.
-    """
 
-    queryset = Question.objects \
-                       .all() \
-                       .order_by("id")
+    # Query from all questions
+    queryset = Question.objects.all()
 
-    serializer_class = QuestionSerializer
+    # Serialize questions using the default question serializer
+    # Commented out as this is done manually in the override below.
+    # serializer_class = QuestionBasicSerializer
 
-    search_fields = (
-        "stem",
-        "note__title",
-        "note__content"
-    )
-
-    filter_fields = (
-        "note",
-        "note__contributor",
-        "domain",
-        "year_level",
-        "note__specialty",
-        "note__topic",
-        "contributor",
-    )
-
-    permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly,
-    )
+    # Require authentication
+    permission_classes = (permissions.IsAuthenticated,)
 
     def create(self, request, *args, **kwargs):
-        """
-        On creation:
-        1. Get the user from the request.
-        2. Ensure there is exactly one correct choice given.
-        """
-        # TODO Would prefer to eventually move to serializers.
+        """ Create a new question from POST request data.
 
-        # Get the user from the request
+        Overrides the default create method, and bypasses the serializer.
+        Might be worth considering whether this could be moved to the
+        serializer at some point, but not quite sure how.
+
+        """
+
+        # Get the required information out of the request data
         contributor = request.user
-        note_id = request.data.get("note_id")
-        domain = request.data.get("domain")
+        objective_id = request.data.get("objective_id")
         stem = request.data.get("stem")
         choices = request.data.get("choices")
-        year_level = request.data.get("year_level")
 
-        if None in [note_id, domain, stem, choices, year_level]:
+        # Ensure that each field was present
+        if None in [objective_id, stem, choices]:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        # Get the note out of the request
-        # TODO more idiomatic way to do this
-        note = Note.objects.get(id=note_id)
+        # Check whether the objective ID exists
+        try:
+            objective = Objective.objects.get(id=objective_id)
+        except ObjectDoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
+        # Assert that the data is valid
         try:
             # Assert only one correct choice
             correct = [choice for choice in choices if choice["is_correct"]]
             assert len(correct) == 1
 
-            # Assert there is at least one other option
-            assert len(choices) - len(correct) > 0
+            # Assert there is more than one choice
+            assert len(choices) > 1
 
             # Assert that the stem is not blank
             assert stem.strip() != ""
@@ -83,283 +107,302 @@ class QuestionListCreate(generics.ListCreateAPIView):
             choices_content = [choice.get("content").strip() for choice in choices]
             choices_set = set(choices_content)
             assert len(choices_content) == len(choices_set)
-
+        # Return a 400 if any of the tests failed
         except AssertionError:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        # Add the question
+        # Create the question
         question = Question.objects.create(
-            contributor=contributor,
-            note=note,
-            stem=stem,
-            year_level=year_level,
-            domain=domain,
+            contributor=contributor, objective=objective, stem=stem
         )
 
-        # TODO Find a way to do this in bulk.
-        # bulk_create() had issues.
+        # Create each question choice for the created question
         for choice in choices:
-            QuestionChoice.objects.create(
-                question=question,
-                **choice
-            )
+            QuestionChoice.objects.create(question=question, **choice)
 
-        serialized = QuestionSerializer(question)
+        # Serialize the added question
+        serialized = QuestionBasicSerializer(question)
 
-        return Response(
-            serialized.data,
-            status=status.HTTP_201_CREATED
-        )
+        # Return the serialized question
+        return Response(serialized.data, status=status.HTTP_201_CREATED)
 
 
-class QuestionRandom(generics.RetrieveAPIView):
+class QuestionList(generics.ListAPIView):
+    """ Retrieves a list of quesions (full information).
+
+    This only retrieves basic information about the question without any of
+    its linked information.
+
     """
-    Retrieves a single random question.
-    """
 
+    # Query from all question objects
     queryset = Question.objects.all()
-    serializer_class = QuestionSerializer
 
+    # Allow filtering by fields
+    # TODO This needs to be integrated with the view - possible override needed on list method
     filter_fields = (
-        "note",
-        "note__contributor",
-        "note__topic",
-        "note__specialty",
-        "year_level",
-        "domain",
+        "objective__contributor",
+        "objective__id",
+        "objective__specialty",
+        "objective__topic",
+        "objective__stage",
         "contributor",
     )
 
-    def retrieve(self, request, *args, **kwargs):
-        """
-        Takes a query parameter quantity.
-        TODO if user is authenticated, mix with spaced repetition
-        """
+    # Serialize with the basic Question serializer
+    serializer_class = QuestionBasicSerializer
 
-        queryset = super().get_queryset()
 
-        question_ids = list(
-            self.filter_queryset(
-                self.get_queryset()
-            ).values_list("id", flat=True)
-        )
+class QuestionIdList(generics.ListAPIView):
+    """ Retrieves a list of question IDs.
 
-        if len(question_ids) > 0:
+    This endpoint is public and returns a list of IDs only (not the full
+    serialized question). This is intended for generating a list of Question
+    IDs for a test.
 
-            random_id = choice(question_ids)
+    # GET
+    Retrieve a list of question IDs.
 
-            question = Question.objects.get(id=random_id)
+    ## Query Parameters
+    
+    - quantity (int): The number of question IDs, default 10
+    - random (bool: "true" or "false"): Whether to randomly sample from IDs, default false
+    - specialty (int): Filtered specialties, default all
+    - topic (int): Filtered topics, default all
+    - stage (int): Filtered stages, default all
 
-            serialized = QuestionSerializer(question)
+    Example URL: `/questions/?quantity=5&random=true&specialty=1&specialty=2&topic=3
 
-            return Response(
-                serialized.data,
-                status=status.HTTP_200_OK
-            )
-
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-class QuestionRandomList(generics.RetrieveAPIView):
-    """
-    Retrieves a list of random question IDs.
     """
 
+    # Query from all Question objects
     queryset = Question.objects.all()
-    serializer_class = QuestionSerializer
 
-    filter_fields = (
-        "note",
-        "note__contributor",
-        "year_level",
-        "domain",
-        "note__topic",
-        "note__specialty",
-        "contributor",
-    )
+    # Use the Question Id
+    serializer_class = QuestionIdSerializer
 
-    def retrieve(self, request, *args, **kwargs):
-        """
-        Takes a query parameter quantity.
-        TODO if user is authenticated, mix with spaced repetition
+    def list(self, request, *args, **kwargs):
+        """ Return a list of question IDs to create a question test. 
         """
 
+        # Get the queryset from the specified parent queryset.
         queryset = super().get_queryset()
 
-        question_ids = list(
-            self.filter_queryset(
-                self.get_queryset()
-            ).values_list("id", flat=True)
+        # Get query params, and set to default if not specified
+        quantity = request.GET.get("quantity") or 10
+        random = request.GET.get("random")
+        specialties = request.GET.getlist("specialty") or [
+            ch[0] for ch in Objective.SPECIALTY_CHOICES
+        ]
+        topics = request.GET.getlist("topic") or [
+            ch[0] for ch in Objective.TOPIC_CHOICES
+        ]
+        stage = request.GET.getlist("stage") or [
+            ch[0] for ch in Objective.STAGE_CHOICES
+        ]
+
+        # Filter the queryset by specialty, topic and stage
+        filtered_questions = queryset.filter(
+            Q(objective__specialty__in=specialties)
+            & Q(objective__topic__in=topics)
+            & Q(objective__stage__in=stage)
         )
 
-        quantity_string = self.request.GET.get("quantity")
+        # Convert the filtered questions to their IDs
+        question_ids = list(filtered_questions.values_list("id", flat=True))
 
-        if quantity_string is not None:
-            quantity = int(quantity_string)
+        # Guard against if the quantity is greater than the number of ids
+        quantity_safe = min(quantity, len(question_ids))
+
+        # Get the quantity of IDs, depending on if random or not
+        if random:
+            selected_ids = sample(question_ids, quantity_safe)
         else:
-            quantity = 10 # default to 10 random questions
+            selected_ids = question_ids[:quantity_safe]
 
-        selected_ids = sample(question_ids, min(quantity, len(question_ids)))
-
-
+        # Return the IDs in a 200 response
         return Response(selected_ids, status=status.HTTP_200_OK)
 
 
-class QuestionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
-    """
-    Retrieves, updates or deletes a question.
+class QuestionRetrieve(generics.RetrieveAPIView):
+    """ Retrieves a single detailed question.
+
+    This is the basic endpoint for when a question is encountered during a
+    test. It includes all linked information such as choices and comments.
 
     """
 
+    # Query from all Question objects
     queryset = Question.objects.all()
 
-    serializer_class = QuestionSerializer
+    # Serialize with the detailed question serializer
+    serializer_class = QuestionDetailSerializer
 
+
+class QuestionUpdate(generics.UpdateAPIView):
+    """ Updates a question.
+    """
+
+    # Query from all Question objects
+    queryset = Question.objects.all()
+
+    # Serialize with the basic Question serializer
+    # Only modify the stem from this endpoint
+    serializer_class = QuestionBasicSerializer
+
+    # Only the contributor can update the question
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
+        IsContributorOrReadOnly,
     )
 
-    def retrieve(self, request, *args, **kwargs):
 
-        user = request.user
+class QuestionDestroy(generics.DestroyAPIView):
+    """ Deletes a question.
+    """
 
-        question_id = kwargs.get('pk')
+    # Query from all Question objects
+    queryset = Question.objects.all()
 
-        if question_id is None:
-            return Response(status.HTTP_404_NOT_FOUND)
-
-        try:
-            question = Question.objects.filter(id=question_id).get()
-        except ObjectDoesNotExist:
-            return Response(status.HTTP_404_NOT_FOUND)
-
-        question_serialized = QuestionSerializer(question)
-
-        if user.is_authenticated:
-
-            liked = QuestionLike.objects.filter(
-                question=question,
-                user=user
-            ).exists()
-
-            num_seen = QuestionResponse.objects.filter(
-                question=question,
-                user=user
-            ).count()
-
-            data = {
-                **question_serialized.data,
-                'liked': liked,
-                'num_seen': num_seen,
-            }
-
-        else:
-
-            data = {
-                **question_serialized.data
-            }
-
-        return Response(data, status=status.HTTP_200_OK)
-
-
-class QuestionResponseCreate(generics.CreateAPIView):
-
-    serializer_class = QuestionResponseSerializer
-
+    # Only the contributor can delete the question
     permission_classes = (
-        permissions.IsAuthenticated,
+        permissions.IsAuthenticatedOrReadOnly,
+        IsContributorOrReadOnly,
     )
 
 
-class QuestionLikeCreate(generics.CreateAPIView):
-    """
-    Creates a like on a question.
-    Perhaps this should be moved to a diferent API,
-    as this should be idempotent.
-    """
+class QuestionRatingCreate(generics.CreateAPIView):
+    """ Create a new question rating.
 
-    serializer_class = QuestionLikeSerializer
+    # POST
 
-    permission_classes = (
-        permissions.IsAuthenticated,
-    )
+    Example Body: 
 
+        { "question": 3
+        , "rating": 4 }
 
-class QuestionFlagCreate(generics.CreateAPIView):
-    """
-    Creates a flag on a question.
-    Again, perhaps like QuestionLike, this should be
-    moved to a different API as it should also be idempotent.
     """
 
-    serializer_class = QuestionFlagSerializer
+    # Use the default question rating serializer
+    serializer_class = QuestionRatingSerializer
 
-    permission_classes = (
-        permissions.IsAuthenticated,
-    )
 
 class QuestionCommentCreate(generics.CreateAPIView):
-    """
-    Create comments on questions.
+    """ Create a comment on a question.
+
+    # POST
+
+    Example Body:
+
+        { "question": 3
+        , "content": "string" }
+
     """
 
+    # Use the default question comment serializer
     serializer_class = QuestionCommentSerializer
 
-    permission_classes = (
-        permissions.IsAuthenticated,
-    )
 
-class QuestionResponseList(generics.ListAPIView):
+class QuestionResponseListCreate(generics.ListCreateAPIView):
+    """ Create a new question response.
+
+    The only required information is the choice ID. 
+
+    # POST
+
+    Example Body:
+
+        { "choice": 3 }
+
+    # GET
+
+
     """
-    Returns a paginated list of question responses.
-    """
 
-
+    # Query all question responses
     queryset = QuestionResponse.objects.all()
 
-    serializer_class = QuestionResponseListSerializer
+    def get_serializer_class(self):
+        """ Use a different serializer based on request type.
+        """
+        if self.request.method == "POST":
+            serializer_class = QuestionResponseCreateSerializer
+        else:  
+            serializer_class = QuestionResponseListSerializer
+        return serializer_class
 
-    permission_classes = (
-        permissions.IsAuthenticated,
-    )
+    def get_permissions(self):
+        """ Use different permissions based on request type.
+        """
+        if self.request.method == "POST":
+            permission_classes = (permissions.AllowAny(),)
+        else:
+            permission_classes = (permissions.IsAuthenticated(),)
+        return permission_classes
 
     def get_queryset(self):
+        # Get the user from the request
         user = self.request.user
-        queryset = self.queryset.filter(user=user).order_by('-created_at')
+
+        # Filter by the user and order by response submission time
+        queryset = self.queryset.filter(user=user).order_by("-created_at")
         return queryset
 
+
 class QuestionAccuracyRetrieve(generics.RetrieveAPIView):
-    """
-    Returns question accuracy by specialty and by topic.
+    """ Returns question accuracy by specialty, topic and stage.
+
+
+    # GET
+
+    ## Query Parameters
+    
+    - group (str): one of "specialty", "topic" or "stage"
+
+    Example URL: `/accuracy/?group=specialty
+    
     """
 
-    permission_classes = (
-        permissions.IsAuthenticated,
-    )
+    permission_classes = (permissions.IsAuthenticated,)
 
     def retrieve(self, request, *args, **kwargs):
 
-        group = self.request.GET.get('group')
+        # Get group from query parameter
+        group = self.request.GET.get("group")
 
-        if group == 'specialty':
-            values = Note.objects.values('specialty')
-        elif group == 'topic':
-            values = Note.objects.values('topic')
+        # Match the group against the type of grouping
+        if group == "specialty":
+            values = Objective.objects.values("specialty")
+        elif group == "topic":
+            values = Objective.objects.values("topic")
+        elif group == "stage":
+            values = Objective.objects.values("stage")
         else:
             Response(status=status.HTTP_400_BAD_REQUEST)
 
+        # Get the user from the request
         user = request.user
 
+        # Annotate correct and incorrect values based on the grouping
         accuracy = values.annotate(
-                          correct=Count(
-                              'note_question__question_response',
-                              filter=Q(note_question__question_response__user=user) &
-                              Q(note_question__question_response__choice__is_correct=True)
-                          ),
-                          incorrect=Count(
-                              'note_question__question_response',
-                              filter=Q(note_question__question_response__user=user) &
-                              Q(note_question__question_response__choice__is_correct=False)
-                          )
-                      )
+            correct=Count(
+                "objective_question__question_choice__choice_response",
+                filter=Q(
+                    objective_question__question_choice__choice_response__user=user
+                )
+                & Q(
+                    objective_question__question_choice__choice_response__choice__is_correct=True
+                ),
+            ),
+            incorrect=Count(
+                "objective_question__question_choice__choice_response",
+                filter=Q(
+                    objective_question__question_choice__choice_response__user=user
+                )
+                & Q(
+                    objective_question__question_choice__choice_response__choice__is_correct=False
+                ),
+            ),
+        )
 
-        return Response(accuracy)
+        return Response(accuracy, status=status.HTTP_200_OK)

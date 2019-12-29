@@ -1,280 +1,258 @@
-import json
-from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 from users.serializers import UserSerializer
-from django.contrib.auth.models import User
-from questions.models import *
-from notes.serializers import NoteSerializer
-from notes.models import Note
+from objectives.serializers import ObjectiveSerializer
+from questions.models import (
+    Question,
+    QuestionChoice,
+    QuestionComment,
+    QuestionRating,
+    QuestionResponse,
+)
 
 
 class QuestionChoiceSerializer(serializers.ModelSerializer):
+    """ The default serializer for a question choice.
+    """
 
+    # A field for the number of times a choice was chosen.
     num_chosen = serializers.SerializerMethodField()
 
     class Meta:
-
         model = QuestionChoice
-
-        fields = "__all__"
+        fields = (
+            "id",
+            "question",
+            "content",
+            "explanation",
+            "is_correct",
+            "num_chosen",
+        )
+        read_only_fields = (
+            "id",
+            "num_chosen",
+        )
 
     def get_num_chosen(self, object):
+        """ Get the number of times this choice was chosen.
+        """
         return object.choice_response.count()
 
-class QuestionCommentSerializer(serializers.ModelSerializer):
 
-    author = UserSerializer(required=False)
+class QuestionCommentSerializer(serializers.ModelSerializer):
+    """ The default serializer for a question comment.
+    """
+
+    # Serialize the author using the User serializer
+    contributor = UserSerializer(required=False)
 
     class Meta:
-
         model = QuestionComment
-
-        fields = "__all__"
-
-        read_only = ("created_at",)
+        fields = (
+            "question",
+            "contributor",
+            "created_at",
+            "content",
+        )
+        read_only_fields = (
+            "created_at",
+            "contributor",
+        )
 
     def create(self, validated_data):
+        """ Get the user from the request on creation.
         """
-        Get the user from the request on creation.
-        """
+        contributor = self.context["request"].user
 
-        author = self.context["request"].user
-
-        question_comment = QuestionComment.objects.create(
-            author=author,
-            **validated_data
-        )
+        # Anonymous comments are permitted
+        if contributor.is_authenticated:
+            question_comment = QuestionComment.objects.create(
+                contributor=contributor, **validated_data
+            )
+        else:
+            question_comment = QuestionComment.objects.create(**validated_data)
 
         return question_comment
 
-class QuestionLikeSerializer(serializers.ModelSerializer):
 
-    user = UserSerializer(
-        required=False,
-        read_only=True
-    )
+class QuestionRatingSerializer(serializers.ModelSerializer):
+    """ The default serializer for a question rating.
+    """
+
+    # Serialize the user using the User serializer
+    user = UserSerializer(required=False)
 
     class Meta:
-
-        model = QuestionLike
-
-        fields = "__all__"
+        model = QuestionRating
+        fields = (
+            "user",
+            "question",
+            "rating",
+        )
+        read_only_fields = ("user",)
 
     def create(self, validated_data):
 
+        # Get the user from the request
         user = self.context["request"].user
 
-        like = QuestionLike.objects.create(
-            user=user,
-            **validated_data
-        )
+        # Anonymous users can also submit ratings
+        if user.is_authenticated:
+            # If authenticated, then only allow one rating (get or create)
+            rating, created = QuestionRating.objects.get_or_create(user=user, **validated_data) 
+        else:
+            rating = QuestionRating.objects.create(**validated_data)
 
-        return like
+        return rating
 
-class QuestionFlagSerializer(serializers.ModelSerializer):
 
-    user = UserSerializer(
-        required=False,
-        read_only=True
-    )
+class QuestionBasicSerializer(serializers.ModelSerializer):
+    """ A basic serializer for a question.
+
+    This includes only the basic information for a question, without any of its linked 
+    information such as comments or choices.
+
+    """
 
     class Meta:
-        model = QuestionFlag
-        fields = "__all__"
-
-    def create(self, validated_data):
-
-        user = self.context["request"].user
-
-        flag = QuestionFlag.objects.create(
-            user=user,
-            **validated_data
+        model = Question
+        fields = (
+            "id",
+            "objective",
+            "contributor",
+            "created_at",
+            "modified_at",
+            "stem",
         )
 
-        return flag
 
-class QuestionSerializer(serializers.ModelSerializer):
+class QuestionDetailSerializer(serializers.ModelSerializer):
+    """ A detailed serializer for a question.
 
+    This should be returned for a full question, and includes the linked
+    information such as question choices, ratings and comments.
+
+    """
+
+    # The contributor should be serialized with the default User serializer
     contributor = UserSerializer()
 
-    choices = QuestionChoiceSerializer(
-        source="question_choice",
-        many=True
-    )
+    # The choices should be serialized with the default QuestionChoice serializer
+    choices = QuestionChoiceSerializer(source="question_choice", many=True)
 
-    comments=QuestionCommentSerializer(
-        source='question_comment',
-        many=True,
-    )
+    # The comments should be serialized with the default QuestionComment serializer
+    comments = QuestionCommentSerializer(source="question_comment", many=True)
 
-    num_likes = serializers.SerializerMethodField()
+    # The objective is fully serialized with the question on read
+    objective = ObjectiveSerializer(read_only=True)
 
-    liked = serializers.BooleanField(
-        default=None
-    )
-
-    num_seen = serializers.IntegerField(
-        default=None
-    )
+    # The average rating should be calculated
+    average_rating = serializers.SerializerMethodField()
 
     class Meta:
-
         model = Question
-
         fields = (
-            'note',
-            'contributor',
-            'id',
-            'domain',
-            'year_level',
-            'stem',
-            'choices',
-            'comments',
-            'num_likes',
-            'liked',
-            'num_seen',
-            'modified_at'
+            "id",
+            "objective",
+            "contributor",
+            "created_at",
+            "modified_at",
+            "stem",
+            "choices",
+            "comments",
+            "average_rating",
+        )
+        read_only_fields = (
+            "id",
+            "created_at",
+            "modified_at",
+            "choices",
+            "comments",
+            "average_rating",
         )
 
-    def get_num_likes(self, object):
-        return object.question_like.count()
+    def get_average_rating(self, object):
+        """ Return the average rating for the given question.
+        """
+        # Count how many ratings are provided
+        count = object.question_rating.count()
+
+        # Protect against a divide by zero error
+        if count > 0:
+            return object.question_rating.sum() / count
+        else:
+            return 0
+
 
 class QuestionIdSerializer(serializers.ModelSerializer):
+    """ Serialize a question using only the ID.
+
+    This serializer is for returning a list of questions to create a test.
+    Each question is then retrieved individually by the client as the test
+    progresses.
+
+    """
 
     class Meta:
-
         model = Question
+        fields = ("id",)
 
-        fields = (
-            'id',
-        )
 
-class QuestionResponseSerializer(serializers.ModelSerializer):
+class QuestionResponseCreateSerializer(serializers.ModelSerializer):
+    """ The serializer for creating a question response.
 
-    user = serializers.PrimaryKeyRelatedField(
-        required=False,
-        read_only=True
-    )
+    The only field required is the `choice` ID - the user is obtained from
+    the context.
+
+    """
+
+    # Serialize the user with the default User serializer
+    user = UserSerializer(required=False)
 
     class Meta:
-
         model = QuestionResponse
-
         fields = (
-            'question',
-            'user',
-            'choice',
-            'ease',
-            'interval_days',
-            'next_due_datetime'
+            "user",
+            "choice",
         )
-
-        read_only = (
-            'ease',
-            'interval_days',
-            'next_due_datetime',
-        )
-
-    def calculate_new_ease(self, old_ease, q):
-        # return old_ease - 0.8 + (0.28 * q - 0.02 * q * q)
-        # Supposedley
-        if q > 0:
-            return old_ease + 0.1
-        else:
-            return max(old_ease - 0.8, 1.3)
-
+        read_only_fields = ("user",)
 
     def create(self, validated_data):
+        """ Get the user from the request.
         """
-        Get the user from the request.
-        """
-
         user = self.context["request"].user
-
-        try:
-            correct_choice = QuestionChoice.objects.filter(
-                question__id=validated_data.get("question").id,
-                is_correct=True,
-            ).get()
-        except ObjectDoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        correct = validated_data.get("choice").id ==  correct_choice.id
-
-        try:
-            last = QuestionResponse.objects.filter(
-                question__id=validated_data.get("question").id,
-                user=user
-            ).order_by('-next_due_datetime')[0]
-
-            # Only modify if it was due before today
-            if last.next_due_datetime <= timezone.now():
-
-                if correct:
-                    new_ease = self.calculate_new_ease(last.ease, 5)
-                    new_interval = last.interval_days * last.ease
-                    next_due_datetime = timezone.now() + timedelta(days=new_interval)
-                else:
-                    new_ease = self.calculate_new_ease(last.ease, 0)
-                    new_interval = last.interval_days * new_ease
-                    next_due_datetime = timezone.now()
-
-            else:
-                new_ease = last.ease
-                new_interval = last.interval_days
-                next_due_datetime = last.next_due_datetime
-
-        except IndexError:
-            if correct:
-                new_interval = 1
-                new_ease = self.calculate_new_ease(2.5, 5)
-                next_due_datetime = timezone.now() + timedelta(days=new_interval)
-            else:
-                new_interval = 0.5
-                new_ease = self.calculate_new_ease(2.5, 0)
-                next_due_datetime = timezone.now()
-
-        response = QuestionResponse.objects.create(
-            user=user,
-            interval_days=new_interval,
-            ease=new_ease,
-            next_due_datetime=next_due_datetime,
-            **validated_data
-        )
-
+        # Allow anonymous response
+        if user.is_authenticated:
+            response = QuestionResponse.objects.create(user=user, **validated_data)
+        else:
+            response = QuestionResponse.objects.create(**validated_data)
         return response
 
+
 class QuestionResponseListSerializer(serializers.ModelSerializer):
+    """ The serializer for viewing a list of question responses.
 
+    This is inteded as to serialize responses for viewing as a response
+    history to questions, so most of the fields are about the question linked
+    to the response.
 
-    question_stem= serializers.ReadOnlyField(source='question.id',)
+    """
 
-    question_stem= serializers.ReadOnlyField(source='question.stem',)
+    # Obtain information about the question that was responded to
+    question_id = serializers.ReadOnlyField(source="choice.question.id")
+    question_stage = serializers.ReadOnlyField(source="choice.question.stage")
+    question_topic = serializers.ReadOnlyField(source="question.note.topic")
+    question_specialty = serializers.ReadOnlyField(source="question.note.specialty")
 
-    question_year_level = serializers.ReadOnlyField(source='question.year_level',)
-
-    question_domain = serializers.ReadOnlyField(source='question.domain',)
-
-    question_specialty = serializers.ReadOnlyField(source='question.note.specialty')
-    
-    question_topic = serializers.ReadOnlyField(source='question.note.topic')
-
-    was_correct = serializers.ReadOnlyField(source='choice.is_correct')
-
+    # Obtain whether the choice was correct or not
+    was_correct = serializers.ReadOnlyField(source="choice.is_correct")
 
     class Meta:
-
         model = QuestionResponse
-        fields =  (
-            'question_id',
-            'question_stem',
-            'question_year_level',
-            'question_domain',
-            'question_specialty',
-            'question_topic',
-            'was_correct',
-            'ease',
-            'next_due_datetime',
-            'created_at',
-            'interval_days',
+        fields = (
+            "question_id",
+            "question_stage",
+            "question_topic",
+            "question_specialty",
+            "was_correct",
+            "created_at",
         )
