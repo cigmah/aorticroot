@@ -162,6 +162,8 @@ class Objective(models.Model):
     )
 
     notes = models.TextField(
+        blank=True,
+        null=True,
         help_text="The notes for this objective in Markdown."
     )
 

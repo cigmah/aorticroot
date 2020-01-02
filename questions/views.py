@@ -128,7 +128,7 @@ class QuestionCreate(generics.CreateAPIView):
 
 
 class QuestionList(generics.ListAPIView):
-    """ Retrieves a list of quesions (full information).
+    """ Retrieves a list of quesions (basic information).
 
     This only retrieves basic information about the question without any of
     its linked information.
@@ -138,19 +138,9 @@ class QuestionList(generics.ListAPIView):
     # Query from all question objects
     queryset = Question.objects.all()
 
-    # Allow filtering by fields
-    # TODO This needs to be integrated with the view - possible override needed on list method
-    filter_fields = (
-        "objective__contributor",
-        "objective__id",
-        "objective__specialty",
-        "objective__topic",
-        "objective__stage",
-        "contributor",
-    )
-
     # Serialize with the basic Question serializer
     serializer_class = QuestionBasicSerializer
+
 
 
 class QuestionIdList(generics.ListAPIView):
@@ -189,7 +179,7 @@ class QuestionIdList(generics.ListAPIView):
         queryset = super().get_queryset()
 
         # Get query params, and set to default if not specified
-        quantity = request.GET.get("quantity") or 10
+        quantity = int(request.GET.get("quantity") or 0) or 10
         random = request.GET.get("random")
         specialties = request.GET.getlist("specialty") or [
             ch[0] for ch in Objective.SPECIALTY_CHOICES

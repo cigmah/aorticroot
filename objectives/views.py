@@ -1,11 +1,14 @@
 from django.shortcuts import render
+from django.db.models import Count, Q
 from rest_framework import generics
 from rest_framework import status
 from rest_framework import permissions
 from rest_framework.response import Response
+from utils.utils import paginate
 from objectives.serializers import ObjectiveSerializer
 from objectives.models import Objective
 from objectives.permissions import IsContributorOrReadOnly
+
 
 class ObjectiveListCreate(generics.ListCreateAPIView):
     """ List objectives or create a new learning objective.
@@ -81,6 +84,47 @@ class ObjectiveListCreate(generics.ListCreateAPIView):
 
     # Require authentication for creation
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def list(self, request, *args, **kwargs):
+        """ Return a list of objectives with filters applied.
+        """
+
+        # Get the queryset from the specified parent queryset.
+        queryset = super().get_queryset()
+
+        # Get query params, and set to default if not specified
+        search = request.GET.get("search")
+        page = int(request.GET.get("page") or 0) or 1
+        specialties = request.GET.getlist("specialty") or [
+            ch[0] for ch in Objective.SPECIALTY_CHOICES
+        ]
+        topics = request.GET.getlist("topic") or [
+            ch[0] for ch in Objective.TOPIC_CHOICES
+        ]
+        stage = request.GET.getlist("stage") or [
+            ch[0] for ch in Objective.STAGE_CHOICES
+        ]
+
+        # Filter the queryset by specialty, topic and stage
+        if search:
+            filtered_objectives = queryset.filter(
+                Q(specialty__in=specialties)
+                & Q(topic__in=topics)
+                & Q(stage__in=stage)
+                & Q(title__contains=search)
+            )
+        else:
+            filtered_objectives = queryset.filter(
+                Q(specialty__in=specialties)
+                & Q(topic__in=topics)
+                & Q(stage__in=stage)
+            )
+
+        data = paginate(page, filtered_objectives, ObjectiveSerializer)
+
+        # Return a HTTP response
+        return Response(data, status=status.HTTP_200_OK)
+
 
 class ObjectiveRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     """ Retrieve, update or destroy an objective at a given ID.

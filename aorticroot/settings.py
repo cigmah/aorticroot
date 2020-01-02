@@ -28,7 +28,7 @@ if os.path.isfile(DOTENV_FILE):
 SECRET_KEY = os.environ["SECRET_KEY"]
 
 # SECURITY WARNING: don"t run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # Set allowed hosts: for development, can set to ["*"], but do not allow this in production.
 ALLOWED_HOSTS = []
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "aorticroot",
+    "utils",
     "objectives",
     "questions",
     "users",
@@ -140,8 +141,7 @@ USE_TZ = True
 APPEND_SLASH = True
 
 # For testing only!
-# CORS_ORIGIN_ALLOW_ALL = True
-
+CORS_ORIGIN_ALLOW_ALL = True
 CORS_ORIGIN_WHITELIST = ("https://aorta.netlify.com",)
 
 
