@@ -23,11 +23,20 @@ from questions.serializers import (
 )
 from questions.permissions import IsContributorOrReadOnly, IsParentContributorOrReadOnly
 from objectives.models import Objective
+from utils.utils import paginate
 
 
-class QuestionCreate(generics.CreateAPIView):
+class QuestionListCreate(generics.ListCreateAPIView):
     """ Create a new question.
 
+    # GET
+
+    Returns a paginated list of basic question data.
+
+    ## Query Parameters
+
+    - page (int): Paginated page number
+    - objective_id (int): Objective id to filter against
 
     # POST
 
@@ -60,7 +69,7 @@ class QuestionCreate(generics.CreateAPIView):
     # serializer_class = QuestionBasicSerializer
 
     # Require authentication
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def create(self, request, *args, **kwargs):
         """ Create a new question from POST request data.
@@ -126,20 +135,33 @@ class QuestionCreate(generics.CreateAPIView):
         # Return the serialized question
         return Response(serialized.data, status=status.HTTP_201_CREATED)
 
+    def list(self, request, *args, **kwargs):
+        """ Return a list of basic question data with filters applied.
 
-class QuestionList(generics.ListAPIView):
-    """ Retrieves a list of quesions (basic information).
+        This only retrieves basic information about the question without any of
+        its linked information.
 
-    This only retrieves basic information about the question without any of
-    its linked information.
+        """
 
-    """
+        # Get the queryset from the specified parent queryset.
+        queryset = super().get_queryset()
 
-    # Query from all question objects
-    queryset = Question.objects.all()
+        # Get query params, and set to default if not specified
+        objective_id = request.GET.get("objective_id")
+        page = int(request.GET.get("page") or 0) or 1
 
-    # Serialize with the basic Question serializer
-    serializer_class = QuestionBasicSerializer
+        # Filter the queryset
+        if objective_id:
+            filtered_questions = queryset.filter(
+                Q(objective__id=objective_id)
+            )
+        else:
+            filtered_questions = queryset
+
+        data = paginate(page, filtered_questions, QuestionBasicSerializer)
+
+        # Return a HTTP response
+        return Response(data, status=status.HTTP_200_OK)
 
 
 
@@ -214,7 +236,7 @@ class QuestionIdList(generics.ListAPIView):
         return Response(selected_ids, status=status.HTTP_200_OK)
 
 
-class QuestionRetrieve(generics.RetrieveAPIView):
+class QuestionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     """ Retrieves a single detailed question.
 
     This is the basic endpoint for when a question is encountered during a
@@ -229,37 +251,11 @@ class QuestionRetrieve(generics.RetrieveAPIView):
     serializer_class = QuestionDetailSerializer
 
 
-class QuestionUpdate(generics.UpdateAPIView):
-    """ Updates a question.
-    """
-
-    # Query from all Question objects
-    queryset = Question.objects.all()
-
-    # Serialize with the basic Question serializer
-    # Only modify the stem from this endpoint
-    serializer_class = QuestionBasicSerializer
-
     # Only the contributor can update the question
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
         IsContributorOrReadOnly,
     )
-
-
-class QuestionDestroy(generics.DestroyAPIView):
-    """ Deletes a question.
-    """
-
-    # Query from all Question objects
-    queryset = Question.objects.all()
-
-    # Only the contributor can delete the question
-    permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly,
-        IsContributorOrReadOnly,
-    )
-
 
 class QuestionRatingCreate(generics.CreateAPIView):
     """ Create a new question rating.

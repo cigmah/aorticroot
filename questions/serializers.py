@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.db.models import Sum
 from users.serializers import UserSerializer
 from objectives.serializers import ObjectiveSerializer
 from questions.models import (
@@ -113,6 +114,9 @@ class QuestionBasicSerializer(serializers.ModelSerializer):
 
     """
 
+    # The contributor should be serialized with the default User serializer
+    contributor = UserSerializer()
+
     class Meta:
         model = Question
         fields = (
@@ -178,7 +182,8 @@ class QuestionDetailSerializer(serializers.ModelSerializer):
 
         # Protect against a divide by zero error
         if count > 0:
-            return object.question_rating.sum() / count
+            total = object.question_rating.aggregate(Sum("rating"))
+            return total["rating__sum"] / count
         else:
             return 0
 

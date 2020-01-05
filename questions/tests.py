@@ -21,8 +21,8 @@ class QuestionTest(ObjectiveTest):
 
     def setUp(self):
         super().setUp()
-        self.url_question_create = reverse("question_create")
-        self.url_question_list = reverse("question_list")
+        self.url_question_create = reverse("question_list_create")
+        self.url_question_list = reverse("question_list_create")
         self.url_question_test = reverse("question_test")
         self.url_question_rating_create = reverse("question_rating_create")
         self.url_question_comment_create = reverse("question_comment_create")
@@ -42,13 +42,13 @@ class QuestionTest(ObjectiveTest):
         self.default_question = read_question.data
 
     def url_question_retrieve(self, pk):
-        return reverse("question_retrieve", kwargs={"pk": pk})
+        return reverse("question_retrieve_update_destroy", kwargs={"pk": pk})
 
     def url_question_update(self, pk):
-        return reverse("question_update", kwargs={"pk": pk})
+        return reverse("question_retrieve_update_destroy", kwargs={"pk": pk})
 
     def url_question_destroy(self, pk):
-        return reverse("question_destroy", kwargs={"pk": pk})
+        return reverse("question_retrieve_update_destroy", kwargs={"pk": pk})
 
     def create_initial_objectives(self):
         """ Create an initial set of objectives.

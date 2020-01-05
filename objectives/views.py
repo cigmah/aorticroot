@@ -17,7 +17,15 @@ class ObjectiveListCreate(generics.ListCreateAPIView):
     authentication.
 
     # GET
-    Returns a list of learning objectives. 
+    Returns a list of learning objectives.
+
+    ## Query Parameters
+
+    - specialty (int, multiple)
+    - topic (int, multiple)
+    - stage (int, multiple)
+    - search (string)
+    - page (int)
 
     ## Responses
 

@@ -28,7 +28,7 @@ if os.path.isfile(DOTENV_FILE):
 SECRET_KEY = os.environ["SECRET_KEY"]
 
 # SECURITY WARNING: don"t run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 # Set allowed hosts: for development, can set to ["*"], but do not allow this in production.
 ALLOWED_HOSTS = []
@@ -141,8 +141,11 @@ USE_TZ = True
 APPEND_SLASH = True
 
 # For testing only!
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = ("https://aorta.netlify.com",)
+# CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_WHITELIST = (
+    "https://aorta.netlify.com",
+    "https://aorta.cigmah.org",
+)
 
 
 # Static files (CSS, JavaScript, Images)

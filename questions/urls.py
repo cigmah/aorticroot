@@ -11,14 +11,8 @@ urlpatterns = [
     path(
         # questions/
         "",
-        QuestionCreate.as_view(),
-        name="question_create",
-    ),
-    path(
-        # questions/
-        "",
-        QuestionList.as_view(),
-        name="question_list",
+        QuestionListCreate.as_view(),
+        name="question_list_create",
     ),
     path(
         # questions/test/
@@ -29,20 +23,8 @@ urlpatterns = [
     path(
         # questions/<int:pk>/
         "<int:pk>/",
-        QuestionRetrieve.as_view(),
-        name="question_retrieve",
-    ),
-    path(
-        # questions/<int:pk>/
-        "<int:pk>/",
-        QuestionUpdate.as_view(),
-        name="question_update",
-    ),
-    path(
-        # questions/<int:pk>/
-        "<int:pk>/",
-        QuestionDestroy.as_view(),
-        name="question_destroy",
+        QuestionRetrieveUpdateDestroy.as_view(),
+        name="question_retrieve_update_destroy",
     ),
     path(
         # questions/ratings/
