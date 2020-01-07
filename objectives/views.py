@@ -119,7 +119,7 @@ class ObjectiveListCreate(generics.ListCreateAPIView):
                 Q(specialty__in=specialties)
                 & Q(topic__in=topics)
                 & Q(stage__in=stage)
-                & Q(title__contains=search)
+                & (Q(title__contains=search) | Q(contributor__username__contains=search))
             )
         else:
             filtered_objectives = queryset.filter(
