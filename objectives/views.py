@@ -128,7 +128,13 @@ class ObjectiveListCreate(generics.ListCreateAPIView):
                 & Q(stage__in=stage)
             )
 
-        data = paginate(page, filtered_objectives, ObjectiveSerializer)
+        ordered_objectives = filtered_objectives.order_by("stage", "specialty", "topic", "id")
+
+        data = paginate(
+            page,
+            ordered_objectives,
+            ObjectiveSerializer
+        )
 
         # Return a HTTP response
         return Response(data, status=status.HTTP_200_OK)
