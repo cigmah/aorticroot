@@ -141,11 +141,11 @@ USE_TZ = True
 APPEND_SLASH = True
 
 # For testing only!
-# CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = (
-    "https://aorta.netlify.com",
-    "https://aorta.cigmah.org",
-)
+CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_WHITELIST = (
+#     "https://aorta.netlify.com",
+#     "https://aorta.cigmah.org",
+# )
 
 
 # Static files (CSS, JavaScript, Images)
