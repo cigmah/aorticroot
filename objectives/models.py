@@ -73,8 +73,9 @@ class Objective(models.Model):
     DISORDERS_SPECIFIC                = 15
     DISORDERS_PAEDIATRIC              = 16
     DISORDERS_PRIMARY_CARE_PREVENTION = 17
-    DISORDERS_TRAUMA_EXTERNAL         = 18
-    MISCELLANEOUS_TOPICS              = 19
+    DISORDERS_GERIATRIC               = 18
+    DISORDERS_TRAUMA_EXTERNAL         = 19
+    MISCELLANEOUS_TOPICS              = 20
 
     # Topic choices.
     TOPIC_CHOICES = [
@@ -96,6 +97,7 @@ class Objective(models.Model):
         (DISORDERS_SPECIFIC                , "DISORDERS_-_SPECIFIC"),
         (DISORDERS_PAEDIATRIC              , "DISORDERS_-_PAEDIATRIC"),
         (DISORDERS_PRIMARY_CARE_PREVENTION , "DISORDERS_-_PRIMARY_CARE_&_PREVENTION"),
+        (DISORDERS_GERIATRIC               , "DISORDERS_-_GERIATRIC"),
         (DISORDERS_TRAUMA_EXTERNAL         , "DISORDERS_-_TRAUMA_EXTERNAL"),
         (MISCELLANEOUS_TOPICS              , "MISCELLANEOUS_TOPICS"),
     ]
